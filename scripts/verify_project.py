@@ -25,6 +25,7 @@ def parse():
  return take().strip('"')
 project=parse();assert position==len(tokens)
 objects=project['objects'];assert project['rootObject'] in objects
+assert all('DEVELOPMENT_ASSET_PATHS' not in obj.get('buildSettings', {}) for obj in objects.values()), 'Unexpected dependency on a development asset directory'
 refs=set(re.findall(r'\b[A-F0-9]{24}\b',text));assert refs==set(objects),refs-set(objects)
 project_object=objects[project['rootObject']]
 assert len(project_object['targets'])==2
