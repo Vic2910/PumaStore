@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+        A00000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessRulesTests.swift; sourceTree = "<group>"; };
+        A00000000000000000000002 = {isa = PBXBuildFile; fileRef = A00000000000000000000001; };
+        A00000000000000000000003 = {isa = PBXGroup; children = (A00000000000000000000001,); path = PumaGasStationTests; sourceTree = "<group>"; };
+        A00000000000000000000004 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = PumaGasStationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+        A00000000000000000000005 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000002,); runOnlyForDeploymentPostprocessing = 0; };
+        A00000000000000000000006 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+        A00000000000000000000007 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+        A00000000000000000000008 = {isa = PBXContainerItemProxy; containerPortal = 404BE5E12EF24ADDBA0B79EE; proxyType = 1; remoteGlobalIDString = 712EBEE4D13141DCB1D6DB1F; remoteInfo = PumaGasStation; };
+        A00000000000000000000009 = {isa = PBXTargetDependency; target = 712EBEE4D13141DCB1D6DB1F; targetProxy = A00000000000000000000008; };
+        A00000000000000000000010 = {isa = PBXNativeTarget; buildConfigurationList = A00000000000000000000011; buildPhases = (A00000000000000000000005,A00000000000000000000006,A00000000000000000000007,); buildRules = (); dependencies = (A00000000000000000000009,); name = PumaGasStationTests; productName = PumaGasStationTests; productReference = A00000000000000000000004; productType = "com.apple.product-type.bundle.unit-test"; };
+        A00000000000000000000011 = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000012,A00000000000000000000013,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+        A00000000000000000000012 = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PumaGasStation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PumaGasStation"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; PRODUCT_BUNDLE_IDENTIFIER = com.puma.franquicia.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug; };
+        A00000000000000000000013 = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PumaGasStation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PumaGasStation"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; PRODUCT_BUNDLE_IDENTIFIER = com.puma.franquicia.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release; };
+
+
+/* Begin PBXBuildFile section */
+		2A436304992E4EA4BCD3B3C2 /* PumaGasStationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717BBB28E2E346668718653D /* PumaGasStationApp.swift */; };
+		BF88DCB58E93474F8936EF36 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771916F5AE03454FBACD4A53 /* RootView.swift */; };
+		E1D84290661E455AB7F7E859 /* DailyCut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F16D48FB0747FCB1D48CE1 /* DailyCut.swift */; };
+		87A75CF9C4AD405B8CDED9E4 /* FuelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89D7DCB4C34C67A0677C93 /* FuelType.swift */; };
+		D67CEAB9CAF8474790E517BF /* Pump.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908A5BB893AF4B1BA1CF79F8 /* Pump.swift */; };
+		213771FEA83A4EF2961D249F /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F735563FF134CE19EFCDBCA /* Station.swift */; };
+		C8E03EEFC0D7473EB34B437D /* Tank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EB1EF34BD24B88AB129A1E /* Tank.swift */; };
+		8CD9CEE583754A4D848B8D19 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C1322388CC496F9972668E /* User.swift */; };
+		7085669EBDD54856BB73BF5E /* MockDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8054E45F464C7598A5D732 /* MockDataService.swift */; };
+		D2FA32D652C2452AB19663A3 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2FD7F550ED46AD8D4F1524 /* AuthViewModel.swift */; };
+		A211E5C579A44D35AEE49215 /* BranchManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0727192A9E24FA98105F779 /* BranchManagerViewModel.swift */; };
+		A4F78C53F95B4187B86FCB77 /* GeneralManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1050664EDC1743F28553168B /* GeneralManagerViewModel.swift */; };
+		06D8A9C26C7B4199BB7F2A1C /* BMDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BAB0524351E4568BEB598B5 /* BMDashboardView.swift */; };
+		16E97149BECB4C5794E9D2C1 /* CutFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4897A3F5607D40F18D661062 /* CutFormView.swift */; };
+		9B74080D3E874DBDA23376C3 /* MetricCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFA3A27FF694B9F9AEF29F7 /* MetricCardView.swift */; };
+		99905D202FF34BABBB0BAC39 /* TankGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E961E210822F4B1AB55AFF88 /* TankGaugeView.swift */; };
+		3D85A2CBB0A04856B8A3061F /* AddManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ACBA2920CE467BBF7F6D64 /* AddManagerView.swift */; };
+		BD00B47F43484620A6406313 /* AddStationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36DAA6F3339542489A22C54E /* AddStationView.swift */; };
+		F2C64BA9DA10434DBADE1F38 /* GMDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 464A180AA1C2418DBDBF99AD /* GMDashboardView.swift */; };
+		1E498C9B28564A5B90C22164 /* StationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CAE45750BB14B348E5F2215 /* StationDetailView.swift */; };
+		D08FBDB53F6D4567AA40A04C /* StationManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130B9D0A8D3C4A6185DAFE67 /* StationManagementView.swift */; };
+		715B8F9B4AC94808BFE30BBF /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA5566841754063AC582812 /* LoginView.swift */; };
+		1436EC07BE044B18B0FB1F79 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1D816143EE048A8A1E64E96 /* Assets.xcassets */; };
+		0DA7BB08572D4B9F81552C20 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF4D37CEBA164986A3A90E0E /* Preview Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		717BBB28E2E346668718653D /* PumaGasStationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PumaGasStationApp.swift"; sourceTree = "<group>"; };
+		771916F5AE03454FBACD4A53 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
+		87F16D48FB0747FCB1D48CE1 /* DailyCut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DailyCut.swift"; sourceTree = "<group>"; };
+		EC89D7DCB4C34C67A0677C93 /* FuelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FuelType.swift"; sourceTree = "<group>"; };
+		908A5BB893AF4B1BA1CF79F8 /* Pump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Pump.swift"; sourceTree = "<group>"; };
+		1F735563FF134CE19EFCDBCA /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Station.swift"; sourceTree = "<group>"; };
+		33EB1EF34BD24B88AB129A1E /* Tank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Tank.swift"; sourceTree = "<group>"; };
+		59C1322388CC496F9972668E /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "User.swift"; sourceTree = "<group>"; };
+		BC8054E45F464C7598A5D732 /* MockDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MockDataService.swift"; sourceTree = "<group>"; };
+		2E2FD7F550ED46AD8D4F1524 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthViewModel.swift"; sourceTree = "<group>"; };
+		D0727192A9E24FA98105F779 /* BranchManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BranchManagerViewModel.swift"; sourceTree = "<group>"; };
+		1050664EDC1743F28553168B /* GeneralManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeneralManagerViewModel.swift"; sourceTree = "<group>"; };
+		6BAB0524351E4568BEB598B5 /* BMDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BMDashboardView.swift"; sourceTree = "<group>"; };
+		4897A3F5607D40F18D661062 /* CutFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CutFormView.swift"; sourceTree = "<group>"; };
+		3EFA3A27FF694B9F9AEF29F7 /* MetricCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MetricCardView.swift"; sourceTree = "<group>"; };
+		E961E210822F4B1AB55AFF88 /* TankGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TankGaugeView.swift"; sourceTree = "<group>"; };
+		B5ACBA2920CE467BBF7F6D64 /* AddManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddManagerView.swift"; sourceTree = "<group>"; };
+		36DAA6F3339542489A22C54E /* AddStationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddStationView.swift"; sourceTree = "<group>"; };
+		464A180AA1C2418DBDBF99AD /* GMDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GMDashboardView.swift"; sourceTree = "<group>"; };
+		8CAE45750BB14B348E5F2215 /* StationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StationDetailView.swift"; sourceTree = "<group>"; };
+		130B9D0A8D3C4A6185DAFE67 /* StationManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StationManagementView.swift"; sourceTree = "<group>"; };
+		0AA5566841754063AC582812 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoginView.swift"; sourceTree = "<group>"; };
+		A1D816143EE048A8A1E64E96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AF4D37CEBA164986A3A90E0E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		EBB8D63502CE44DE9C238F1E /* PumaGasStation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PumaGasStation.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		40B19D3787C64398AC2A01B0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D8CDF96B6E42449FA80ED53B /* GeneralManager */ = {
+			isa = PBXGroup;
+			children = (
+				B5ACBA2920CE467BBF7F6D64 /* AddManagerView.swift */,
+				36DAA6F3339542489A22C54E /* AddStationView.swift */,
+				464A180AA1C2418DBDBF99AD /* GMDashboardView.swift */,
+				8CAE45750BB14B348E5F2215 /* StationDetailView.swift */,
+				130B9D0A8D3C4A6185DAFE67 /* StationManagementView.swift */,
+			);
+			path = "GeneralManager";
+			sourceTree = "<group>";
+		};
+		5F65A5FB9AC045F78DA8EB60 /* BranchManager */ = {
+			isa = PBXGroup;
+			children = (
+				6BAB0524351E4568BEB598B5 /* BMDashboardView.swift */,
+				4897A3F5607D40F18D661062 /* CutFormView.swift */,
+			);
+			path = "BranchManager";
+			sourceTree = "<group>";
+		};
+		A304C069DF3D48608609A45E /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				3EFA3A27FF694B9F9AEF29F7 /* MetricCardView.swift */,
+				E961E210822F4B1AB55AFF88 /* TankGaugeView.swift */,
+			);
+			path = "Components";
+			sourceTree = "<group>";
+		};
+		EA56E63FCE8A4F338409EDD6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				BC8054E45F464C7598A5D732 /* MockDataService.swift */,
+			);
+			path = "Services";
+			sourceTree = "<group>";
+		};
+		0FA39BD5C0FA4ECAB7F083CC /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				87F16D48FB0747FCB1D48CE1 /* DailyCut.swift */,
+				EC89D7DCB4C34C67A0677C93 /* FuelType.swift */,
+				908A5BB893AF4B1BA1CF79F8 /* Pump.swift */,
+				1F735563FF134CE19EFCDBCA /* Station.swift */,
+				33EB1EF34BD24B88AB129A1E /* Tank.swift */,
+				59C1322388CC496F9972668E /* User.swift */,
+			);
+			path = "Models";
+			sourceTree = "<group>";
+		};
+		DD13B8E378234F39B13D19E1 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				717BBB28E2E346668718653D /* PumaGasStationApp.swift */,
+				771916F5AE03454FBACD4A53 /* RootView.swift */,
+			);
+			path = "App";
+			sourceTree = "<group>";
+		};
+		5D9D1F720F174D5FB6A736FB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5F65A5FB9AC045F78DA8EB60 /* BranchManager */,
+				A304C069DF3D48608609A45E /* Components */,
+				D8CDF96B6E42449FA80ED53B /* GeneralManager */,
+				0AA5566841754063AC582812 /* LoginView.swift */,
+			);
+			path = "Views";
+			sourceTree = "<group>";
+		};
+		44A64457BE0F4033A6794E58 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				2E2FD7F550ED46AD8D4F1524 /* AuthViewModel.swift */,
+				D0727192A9E24FA98105F779 /* BranchManagerViewModel.swift */,
+				1050664EDC1743F28553168B /* GeneralManagerViewModel.swift */,
+			);
+			path = "ViewModels";
+			sourceTree = "<group>";
+		};
+		CE444E0B015647F1B372B8C7 /* PumaGasStation */ = {
+			isa = PBXGroup;
+			children = (
+				DD13B8E378234F39B13D19E1 /* App */,
+				0FA39BD5C0FA4ECAB7F083CC /* Models */,
+				EA56E63FCE8A4F338409EDD6 /* Services */,
+				44A64457BE0F4033A6794E58 /* ViewModels */,
+				5D9D1F720F174D5FB6A736FB /* Views */,
+				A1D816143EE048A8A1E64E96 /* Assets.xcassets */,
+				8A958AAFC9B448D4A142F92C /* Preview Content */,
+			);
+			path = PumaGasStation;
+			sourceTree = "<group>";
+		};
+		8A958AAFC9B448D4A142F92C /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				AF4D37CEBA164986A3A90E0E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		392DD818990A499F830F87FA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EBB8D63502CE44DE9C238F1E /* PumaGasStation.app */,
+                A00000000000000000000004,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B048A5C0EADD4C34A63112A0 = {
+			isa = PBXGroup;
+			children = (
+				CE444E0B015647F1B372B8C7 /* PumaGasStation */,
+                A00000000000000000000003,
+				392DD818990A499F830F87FA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		712EBEE4D13141DCB1D6DB1F /* PumaGasStation */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7CD8C3657C7B484FBCB66DF1 /* Build configuration list for PBXNativeTarget "PumaGasStation" */;
+			buildPhases = (
+				41DD5A405A894D9199DA1063 /* Sources */,
+				40B19D3787C64398AC2A01B0 /* Frameworks */,
+				B48E3C6B04B04ABD8787CC7A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PumaGasStation;
+			productName = PumaGasStation;
+			productReference = EBB8D63502CE44DE9C238F1E /* PumaGasStation.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		404BE5E12EF24ADDBA0B79EE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					712EBEE4D13141DCB1D6DB1F = {
+						CreatedOnToolsVersion = 15.2;
+					};
+				};
+			};
+			buildConfigurationList = 1993F61EF41B4CED8D8B616B /* Build configuration list for PBXProject "PumaGasStation" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B048A5C0EADD4C34A63112A0;
+			productRefGroup = 392DD818990A499F830F87FA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				712EBEE4D13141DCB1D6DB1F /* PumaGasStation */,
+                A00000000000000000000010,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B48E3C6B04B04ABD8787CC7A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1436EC07BE044B18B0FB1F79 /* Assets.xcassets in Resources */,
+				0DA7BB08572D4B9F81552C20 /* Preview Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		41DD5A405A894D9199DA1063 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A436304992E4EA4BCD3B3C2 /* PumaGasStationApp.swift in Sources */,
+				BF88DCB58E93474F8936EF36 /* RootView.swift in Sources */,
+				E1D84290661E455AB7F7E859 /* DailyCut.swift in Sources */,
+				87A75CF9C4AD405B8CDED9E4 /* FuelType.swift in Sources */,
+				D67CEAB9CAF8474790E517BF /* Pump.swift in Sources */,
+				213771FEA83A4EF2961D249F /* Station.swift in Sources */,
+				C8E03EEFC0D7473EB34B437D /* Tank.swift in Sources */,
+				8CD9CEE583754A4D848B8D19 /* User.swift in Sources */,
+				7085669EBDD54856BB73BF5E /* MockDataService.swift in Sources */,
+				D2FA32D652C2452AB19663A3 /* AuthViewModel.swift in Sources */,
+				A211E5C579A44D35AEE49215 /* BranchManagerViewModel.swift in Sources */,
+				A4F78C53F95B4187B86FCB77 /* GeneralManagerViewModel.swift in Sources */,
+				06D8A9C26C7B4199BB7F2A1C /* BMDashboardView.swift in Sources */,
+				16E97149BECB4C5794E9D2C1 /* CutFormView.swift in Sources */,
+				9B74080D3E874DBDA23376C3 /* MetricCardView.swift in Sources */,
+				99905D202FF34BABBB0BAC39 /* TankGaugeView.swift in Sources */,
+				3D85A2CBB0A04856B8A3061F /* AddManagerView.swift in Sources */,
+				BD00B47F43484620A6406313 /* AddStationView.swift in Sources */,
+				F2C64BA9DA10434DBADE1F38 /* GMDashboardView.swift in Sources */,
+				1E498C9B28564A5B90C22164 /* StationDetailView.swift in Sources */,
+				D08FBDB53F6D4567AA40A04C /* StationManagementView.swift in Sources */,
+				715B8F9B4AC94808BFE30BBF /* LoginView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D0DD4C0132CA4A53B65172F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CE18D1BE53E44088A05D408B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4D66CAF9DB0D4A53ABE3FE02 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"PumaGasStation/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_CFBundleDisplayName = "PUMA Franquicia";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.puma.franquicia.gasolineras";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9E78556E82974A7A9A3E7EEF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"PumaGasStation/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_CFBundleDisplayName = "PUMA Franquicia";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.puma.franquicia.gasolineras";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1993F61EF41B4CED8D8B616B /* Build configuration list for PBXProject "PumaGasStation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0DD4C0132CA4A53B65172F5 /* Debug */,
+				CE18D1BE53E44088A05D408B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7CD8C3657C7B484FBCB66DF1 /* Build configuration list for PBXNativeTarget "PumaGasStation" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D66CAF9DB0D4A53ABE3FE02 /* Debug */,
+				9E78556E82974A7A9A3E7EEF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 404BE5E12EF24ADDBA0B79EE /* Project object */;
+}

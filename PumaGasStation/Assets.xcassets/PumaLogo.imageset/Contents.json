@@ -1,0 +1,12 @@
+{
+  "images": [
+    {
+      "filename": "puma-logo.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
