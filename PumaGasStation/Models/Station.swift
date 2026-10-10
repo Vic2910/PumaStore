@@ -13,6 +13,11 @@ struct Station: Identifiable, Codable {
     var tanks: [Tank]
     var cuts: [DailyCut]
     var gerenteNombre: String
+    var receiptHistory: [TankReceipt]?
+    var receipts: [TankReceipt] {
+        get { receiptHistory ?? [] }
+        set { receiptHistory = newValue }
+    }
 
     init(id: UUID = UUID(), nombre: String, direccion: String, ciudad: String, tanks: [Tank], cuts: [DailyCut] = [], gerenteNombre: String) {
         self.id = id
@@ -29,7 +34,7 @@ struct Station: Identifiable, Codable {
     }
 
     var totalComprasMonto: Double {
-        cuts.filter { $0.cerrado }.reduce(0) { $0 + $1.totalComprasMonto }
+        cuts.filter { $0.cerrado }.reduce(0) { $0 + $1.totalComprasMonto } + receipts.reduce(0) { $0 + $1.cost }
     }
 
     var totalPerdidasGalones: Double {

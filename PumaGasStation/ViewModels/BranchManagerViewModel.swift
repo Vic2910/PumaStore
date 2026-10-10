@@ -69,9 +69,9 @@ final class CutFormViewModel: ObservableObject {
         guard !corte.cerrado, let index = corte.pumps.firstIndex(where: { $0.id == pumpID }) else { return }
         corte.pumps[index].ventasMonto = volume * corte.pumps[index].fuelType.precioReferencia
     }
-    func selectShift(_ shift: CutShift, branch: BranchManagerViewModel) {
+    @MainActor func selectShift(_ shift: CutShift, branch: BranchManagerViewModel) async {
         guard shift != corte.shift else { return }
-        if !corte.cerrado, !branch.guardar(corte: corte, cerrar: false) { return }
+        if !corte.cerrado, !(await SupabaseService.shared.perform { branch.guardar(corte: corte, cerrar: false) }) { return }
         corte = branch.nuevoCorte(shift: shift)
     }
 }

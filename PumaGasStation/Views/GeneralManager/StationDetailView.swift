@@ -83,6 +83,6 @@ struct StationDetailView: View {
 
 #Preview {
     NavigationStack {
-        StationDetailView(station: MockDataService.shared.stations.first!).environmentObject(GeneralManagerViewModel())
+        StationDetailView(station: Station(nombre: "Sucursal de vista previa", direccion: "", ciudad: "", tanks: [], gerenteNombre: "")).environmentObject(GeneralManagerViewModel())
     }
 }

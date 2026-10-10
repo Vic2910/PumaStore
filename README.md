@@ -1,68 +1,25 @@
 # PUMA · Gestión de franquicia
 
-Aplicación SwiftUI para iOS 17+, con Swift Charts, navegación por rol y arquitectura MVVM. Abre `PumaGasStation.xcodeproj`, selecciona el esquema compartido **PumaGasStation** y un simulador de iPhone. Ejecuta con ⌘R; las pruebas XCTest se ejecutan con ⌘U. No requiere paquetes externos. Para instalar en un dispositivo real debes seleccionar tu equipo de firma de Apple.
+Aplicación SwiftUI iOS 17+ y aplicación web, con datos compartidos en Supabase. Abre `PumaGasStation.xcodeproj`, esquema **PumaGasStation**, en Xcode. No requiere paquetes Swift externos.
 
-## Acceso de demostración
+**El acceso normal usa correo y contraseña de Supabase Auth.** Se retiró el login local de demostración del flujo de producción. Cada guardado espera confirmación del servidor; no hace falta pulsar Publicar. Se incluyen sucursales, gerentes, combustible/cortes, personal, turnos, productos, ventas y servicios.
 
-Contraseña para todas las cuentas iniciales: `1234`.
+Consulta [PUESTA_EN_MARCHA.md](PUESTA_EN_MARCHA.md) para terminar la instalación: ejecutar la versión final de la migración 002, crear la cuenta inicial en Auth y vincular su perfil general. Las tablas y la función de guardado ya responden en tu proyecto; no se ha verificado una sesión real porque aún no se proporcionó acceso a una cuenta.
 
-| Usuario | Rol | Sucursal |
-| --- | --- | --- |
-| gerente.general | Gerente General · Gabriela Díaz | Todas |
-| santa.ana | Gerente de Sucursal · Abigail Rivera | Santa Ana Centro |
-| san.salvador | Gerente de Sucursal · Ana Rivas | San Salvador Norte |
-| sonsonate | Gerente de Sucursal · José Portillo | Sonsonate Km 65 |
+## Turnos
 
-La cuenta `santa.ana` permite retomar el corte vespertino pendiente. Los datos iniciales son ejemplos deterministas; los tanques representan el inventario posterior a los cortes cerrados incluidos. Las nuevas sucursales comienzan con tanques vacíos: registra la recepción inicial en un corte.
+El diseño sigue la referencia: programación con filtros y contadores; asignación, detalle y edición; horarios mañana, tarde, noche y personalizado; observaciones, validación de empleados activos y solapamientos; cancelación confirmada que conserva historial y libera horario. Los estados se basan en marcaciones reales, no en suponer que el empleado trabajó por haber llegado la hora.
 
-## Capas
+## Web
 
-- `Models`: sucursales, combustibles, tanques, usuarios y movimientos de los cortes. No dependen de SwiftUI.
-- `ViewModels`: autenticación, consolidación por sucursal y global, administración, reportes y borrador de captura.
-- `Services/MockDataService.swift`: repositorio local compartido, validación del cierre, balance de inventario y persistencia atómica. Se conserva el nombre original para mantener la estructura del proyecto existente; no es un backend remoto.
-- `Views`: dashboards por rol, formularios, inventario, bombas, sucursales, detalle, gerentes, reportes y componentes reutilizables.
+Ejecuta `python -m http.server 8765 --bind 127.0.0.1 --directory web-preview` y abre `http://127.0.0.1:8765`. También puedes abrir `web-preview/PUMA-Vista-Previa.html`; para usar Auth y caché de forma consistente se recomienda el servidor local. Consulta [web-preview/README.md](web-preview/README.md).
 
-Los ViewModels principales tienen vida estable mediante `@StateObject`. Las suscripciones mantienen los datos visibles actualizados al cerrar un corte o reasignar una sucursal. Las contraseñas se guardan en Keychain y se excluyen del archivo JSON, protegido con Data Protection. Las cuentas iniciales y sus contraseñas son exclusivamente de demostración.
+## Comprobaciones
 
-## Reglas implementadas
+- `python scripts/test_web.py`: 41 pruebas JavaScript de negocio, render HTML, Auth/REST simulados, guardado automático y errores de red.
+- `python scripts/verify_project.py`: PBX, scheme y assets válidos; 27 archivos Swift registrados.
+- `python web-preview/build-preview.py`: regenera el HTML autónomo.
+- `python scripts/check_supabase.py`: comprobaciones no mutantes de Auth, permisos anónimos y existencia del endpoint de guardado.
+- `supabase/tests/automatic_operations.sql`: pruebas transaccionales de servidor para ejecutar en SQL Editor; termina con ROLLBACK. No ejecutadas aquí.
 
-1. Cada corte contiene exactamente las bombas **1 a 6**, sin duplicados. Bombas 1–2: Súper; 3–4: Regular; 5–6: Diésel. Esta distribución es una decisión de implementación; el PDF no define el combustible de cada bomba.
-2. Una sucursal admite un corte matutino y un corte vespertino por fecha. Retomar un borrador conserva su identificador. El calendario de agrupación utiliza `America/El_Salvador`.
-3. Las seis bombas deben marcarse registradas para cerrar el corte, incluso si una reporta cero ventas. Los galones y los montos reales son editables. El precio de referencia solo prellena el monto al modificar los galones; no representa una cotización actual.
-4. Las compras registran combustible, cantidad, costo y proveedor. Las pérdidas registran combustible, cantidad y motivo. Se rechazan valores negativos, no finitos, proveedores vacíos y motivos vacíos.
-5. El cierre calcula por combustible: `inventario final = inventario inicial + recepciones − ventas − pérdidas`. Si el resultado es negativo o supera la capacidad, se rechaza el cierre completo. Los cortes cerrados son inmutables: guardarlos otra vez no altera el inventario.
-6. Los borradores no afectan inventario ni métricas. La consolidación usa solo cortes cerrados. Las tarjetas de hoy filtran por fecha; el desempeño por sucursal muestra el total histórico. Los reportes permiten 7, 30, 90 y 365 días.
-7. El nivel global se obtiene de la suma de existencias dividida entre la suma de capacidades, no del promedio de porcentajes de las sucursales. Las alertas individuales siguen visibles aunque el nivel global sea saludable.
-8. Registrar un gerente exige usuario único y una sucursal válida. Reasignarlo libera la asignación previa; cada sucursal conserva un gerente activo.
-9. Una escritura fallida revierte el cambio en memoria. Un archivo persistido ilegible se informa y no se reemplaza automáticamente.
-
-### Umbrales
-
-El PDF no proporciona umbrales numéricos. Se conserva la regla del proyecto original, compatible con los estados de las referencias adjuntas:
-
-| Estado | Nivel |
-| --- | --- |
-| Crítico | Menor del 25 % |
-| Medio | Desde 25 % hasta menos del 60 % |
-| Óptimo | Desde 60 % |
-
-Los volúmenes se expresan en **galones** de forma consistente, como el proyecto original. Las imágenes adjuntas muestran litros; el PDF no prescribe unidad. Si se decide trabajar en litros, se debe migrar explícitamente el almacenamiento y las etiquetas, no solo cambiar el texto.
-
-## Vistas y prioridad del documento
-
-Incluye Dashboard General, sucursales, alta de sucursal, detalle vivo de estación, gerentes, alta y reasignación, reportes, Dashboard de Sucursal, cortes diarios, captura individual de las seis bombas, inventario y perfil. El reabastecimiento genera una solicitud compartible mediante la hoja nativa de iOS; no afirma que se haya enviado a un proveedor.
-
-Se toman de las referencias el fondo gris, tarjetas blancas, verde corporativo, indicadores de tanques, navegación inferior y jerarquía de las secciones. El logo se extrajo de la imagen suministrada, cuya resolución es pequeña. La fidelidad exacta requiere comparar renders en el simulador y reemplazarlo por el recurso original de alta resolución. Las referencias incluyen sucursales fuera de El Salvador, ocho bombas, servicios de mantenimiento y métricas de clientes/satisfacción sin fuente; se prioriza el alcance del PDF usando estaciones salvadoreñas, seis bombas y datos exclusivos de combustible.
-
-## Verificación y límites de la entrega
-
-- Se leyeron y revisaron visualmente las tres páginas de LABORATORIO 22.pdf.
-- Se verificaron la sintaxis estructural OpenStep del `.pbxproj`, sus 85 objetos y referencias, los 22 archivos Swift de la app, los dos targets, el XML del esquema compartido y los JSON de assets. Ejecutar `python scripts/verify_project.py` desde la raíz repite esa verificación. No equivale a compilar Swift.
-- Se incluyen seis pruebas XCTest para bombas únicas y completas, cierre único, dos turnos, balance y rechazo atómico, límites de estado, consolidación ponderada y persistencia. **No ejecutadas:** este entorno Windows no dispone de Xcode, SDK iOS ni simulador.
-- La compilación, ejecución de XCTest y comparación visual en iPhone están pendientes de verificación en macOS. No se certifica fidelidad píxel a píxel ni estado listo para producción.
-- La persistencia y autenticación son locales. Para operación real de la franquicia en múltiples dispositivos hacen falta backend, autenticación remota, autorización del servidor, auditoría, sincronización y resolución de concurrencia. Los cambios realizados en dispositivos distintos no se consolidan entre sí.
-- El prototipo interactivo en **Figma** exigido por el laboratorio no se creó. La implementación SwiftUI y su navegación no sustituyen ese entregable.
-
-## Vista previa interactiva para Windows
-
-Se agregó `web-preview/`. Abre `web-preview/PUMA-Vista-Previa.html` directamente en tu navegador, sin instalar nada, o consulta `web-preview/README.md` para usar el servidor local. Permite probar ambos roles y los movimientos de inventario. Sus 15 pruebas de negocio y el recorrido de captura/cierre en navegador pasaron. Esta implementación web no ejecuta SwiftUI ni confirma la compilación iOS.
+La compilación/XCTest y revisión visual en iPhone requieren macOS/Xcode. No se certifica todavía compilación ni fidelidad píxel a píxel. Consulta [IMPLEMENTACION.md](IMPLEMENTACION.md) para arquitectura, archivos modificados y límites.

@@ -37,7 +37,7 @@ struct AddStationView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Guardar") {
-                        if viewModel.addStation(nombre: nombre, direccion: direccion, ciudad: ciudad, gerenteNombre: gerenteNombre.isEmpty ? "Sin asignar" : gerenteNombre) { dismiss() }
+                        Task { if await SupabaseService.shared.perform({ viewModel.addStation(nombre: nombre, direccion: direccion, ciudad: ciudad, gerenteNombre: gerenteNombre.isEmpty ? "Sin asignar" : gerenteNombre) }) { dismiss() } else { viewModel.errorMessage = SupabaseService.shared.message } }
                     }
                     .disabled(nombre.isEmpty || ciudad.isEmpty)
                 }

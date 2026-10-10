@@ -30,7 +30,7 @@ struct LoginView: View {
                 }
 
                 VStack(spacing: 14) {
-                    TextField("Usuario", text: $usuario)
+                    TextField("Correo electrónico", text: $usuario).keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .padding()
@@ -63,13 +63,13 @@ struct LoginView: View {
                 }
                 .padding(.horizontal, 24)
 
+                NavigationLink("Acceso con Supabase", destination: DatabaseConnectionView())
+
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Usuarios de prueba (contraseña: 1234)")
+                    Text("Acceso seguro con Supabase")
                         .font(.caption.bold())
-                    Text("• gerente.general — Gerente General")
-                    Text("• santa.ana — Gerente de Sucursal (Santa Ana)")
-                    Text("• san.salvador — Gerente de Sucursal (San Salvador)")
-                    Text("• sonsonate — Gerente de Sucursal (Sonsonate)")
+                    Text("Usa el correo y contraseña de tu cuenta registrada.")
+                    Text("Los datos se comparten entre móvil y web.")
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

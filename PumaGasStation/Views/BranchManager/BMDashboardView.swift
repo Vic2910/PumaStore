@@ -103,7 +103,7 @@ struct InventoryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Actualizado con los cortes cerrados").font(.caption).foregroundStyle(.secondary)
+                Text("Actualizado con cortes cerrados y llenados").font(.caption).foregroundStyle(.secondary)
                 ForEach(viewModel.tanks) { tank in
                     HStack(spacing: 12) {
                         TankGaugeView(title: "", percentage: tank.percentage, status: tank.status, subtitle: "").frame(width: 48)
@@ -118,6 +118,16 @@ struct InventoryView: View {
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Historial de Recepciones").font(.subheadline.bold())
+                    ForEach(viewModel.station.receipts.reversed()) { receipt in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("\(receipt.supplier) (\(receipt.fuel.rawValue))").font(.caption.bold())
+                                Text(receipt.date).font(.caption2).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("\(receipt.volume, specifier: "%.0f") gal ✓").font(.caption).foregroundStyle(PumaStyle.green)
+                        }
+                    }
                     ForEach(viewModel.cutsOrdenados.filter { $0.cerrado }) { cut in
                         ForEach(cut.purchases) { purchase in
                             HStack {

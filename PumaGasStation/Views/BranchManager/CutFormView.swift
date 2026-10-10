@@ -22,7 +22,7 @@ struct CutFormView: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     ForEach(CutShift.allCases) { shift in
-                        Button { formModel.selectShift(shift, branch: viewModel) } label: {
+                        Button { Task { await formModel.selectShift(shift, branch: viewModel) } } label: {
                             Text(shift == .matutino ? "Corte Matutino" : "Corte Vespertino")
                             .font(.caption.bold()).padding(10).frame(maxWidth: .infinity)
                             .background(corte.shift == shift ? PumaStyle.green : .white)
@@ -48,7 +48,7 @@ struct CutFormView: View {
                             if !corte.cerrado { Button { formModel.corte.purchases.removeAll { $0.id == purchase.id } } label: { Image(systemName: "trash") }.accessibilityLabel("Eliminar compra") }
                         }
                     }
-                    if !corte.cerrado { Button("Agregar compra / recepción") { showingAddPurchase = true }.font(.caption.bold()) }
+                    Text("Las nuevas recepciones se registran en Más → Llenar tanques.").font(.caption).foregroundStyle(.secondary)
                 }.pumaCard()
                 Text("Registro por Bomba (6)").font(.subheadline.bold())
                 ForEach($formModel.corte.pumps) { $pump in
@@ -69,7 +69,7 @@ struct CutFormView: View {
                 }.pumaCard()
                 if !corte.cerrado {
                     Text("\(corte.pumps.filter { $0.completado }.count)/6 bombas registradas").font(.caption).foregroundStyle(.secondary)
-                    Button("Guardar borrador") { if viewModel.guardar(corte: corte, cerrar: false) { dismiss() } }
+                    Button("Guardar borrador") { Task { if await SupabaseService.shared.perform({ viewModel.guardar(corte: corte, cerrar: false) }) { dismiss() } } }
                 }
             }.padding(16)
         }
@@ -77,7 +77,7 @@ struct CutFormView: View {
         .navigationTitle("Corte Diario").navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
             if !corte.cerrado {
-                Button { if viewModel.guardar(corte: corte, cerrar: true) { dismiss() } } label: {
+                Button { Task { if await SupabaseService.shared.perform({ viewModel.guardar(corte: corte, cerrar: true) }) { dismiss() } } } label: {
                     Text("Consolidar y Cerrar Corte").font(.subheadline.bold()).frame(maxWidth: .infinity).padding(12)
                 }.buttonStyle(.borderedProminent).disabled(!corte.todasLasBombasCompletas).padding(16).background(PumaStyle.background)
             }
@@ -214,8 +214,9 @@ struct AddLossView: View {
 }
 
 #Preview {
+    let station = Station(nombre: "Sucursal de vista previa", direccion: "", ciudad: "", tanks: [], gerenteNombre: "")
     NavigationStack {
-        CutFormView(corte: BranchManagerViewModel(station: MockDataService.shared.stations.first!).nuevoCorte(shift: .matutino))
-            .environmentObject(BranchManagerViewModel(station: MockDataService.shared.stations.first!))
+        CutFormView(corte: BranchManagerViewModel(station: station).nuevoCorte(shift: .matutino))
+            .environmentObject(BranchManagerViewModel(station: station))
     }
 }

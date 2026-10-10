@@ -39,7 +39,14 @@ struct ManagersView: View {
                             Text(user.nombre).font(.headline)
                             Text(user.usuario).font(.caption).foregroundStyle(.secondary)
                             Text("Sucursal: \(viewModel.stations.first { $0.id == user.stationID }?.nombre ?? "Ninguna")").font(.caption).foregroundStyle(PumaStyle.green)
-                            Button("Reasignar") { selected = user }.font(.caption.bold()).buttonStyle(.bordered)
+                            Button(user.isActive ? "Desactivar" : "Activar", role: user.isActive ? .destructive : nil) {
+                                Task { @MainActor in
+                                    if SupabaseService.shared.profile != nil {
+                                        do { try await SupabaseService.shared.setManager(user.id, active: !user.isActive) } catch { viewModel.errorMessage = error.localizedDescription }
+                                    } else { viewModel.errorMessage = "Inicia sesión con Supabase." }
+                                }
+                            }
+                            Button("Reasignar") { selected = user }.disabled(!user.isActive).font(.caption.bold()).buttonStyle(.bordered)
                         }
                         Spacer(minLength: 0)
                         Text(user.stationID == nil ? "Disponible" : "Asignado").font(.caption2).foregroundStyle(PumaStyle.green)
@@ -69,7 +76,7 @@ struct ManagerAssignmentView: View {
                 .onAppear { stationID = user.stationID }
                 .toolbar {
                     Button("Cancelar") { dismiss() }
-                    Button("Guardar") { if viewModel.assignManager(userID: user.id, stationID: stationID) { dismiss() } }
+                    Button("Guardar") { Task { if await SupabaseService.shared.assignManager(id: user.id, stationID: stationID) { dismiss() } else { viewModel.errorMessage = SupabaseService.shared.message } } }
                 }
                 .alert("No se pudo guardar", isPresented: Binding(get: { viewModel.errorMessage != nil }, set: { if !$0 { viewModel.errorMessage = nil } })) { Button("Aceptar") { viewModel.errorMessage = nil } } message: { Text(viewModel.errorMessage ?? "") }
         }

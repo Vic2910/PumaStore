@@ -5,14 +5,14 @@
 <div class="workspace">
  <aside class="preview-panel">
   <div class="preview-brand"><img src="assets/puma-logo.png" alt="PUMA"><span>PUMA<span class="overline">GESTIÓN DE FRANQUICIA</span></span></div>
-  <span class="preview-tag">VISTA PREVIA INTERACTIVA</span>
+  <span class="preview-tag">GESTIÓN CONECTADA</span>
   <h1>Tu gasolinera,<br>en tus manos.</h1>
   <p>Explora ambos perfiles y comprueba cómo cada corte actualiza el inventario y los resultados de la franquicia.</p>
-  <div class="role-controls"><button data-action="demo-general" class="role-button"><span>Gerente General</span><small>Consolidación y administración</small></button><button data-action="demo-branch" class="role-button"><span>Gerente de Sucursal</span><small>Santa Ana · Abigail Rivera</small></button></div>
-  <div class="preview-note"><span class="status-dot"></span>Sin costo · Datos guardados en este navegador</div>
+  <div class="role-controls" hidden><button data-action="demo-general" class="role-button"><span>Gerente General</span><small>Consolidación y administración</small></button><button data-action="demo-branch" class="role-button"><span>Gerente de Sucursal</span><small>Santa Ana · Abigail Rivera</small></button></div>
+  <div class="preview-note"><span class="status-dot"></span>Datos compartidos con Supabase</div>
   <details><summary>Qué puedes probar</summary><ol><li>Abre el perfil de Sucursal.</li><li>Captura el corte vespertino y registra las seis bombas.</li><li>Añade compras o pérdidas y cierra el corte.</li><li>Abre el perfil General y revisa la consolidación.</li></ol></details>
   <p class="technical-note">Versión web equivalente. No ejecuta ni valida la compilación del código SwiftUI.</p>
-  <button data-action="reset-request" class="text-button">Reiniciar datos de demostración</button>
+  <button hidden data-action="reset-request" class="text-button">Reiniciar datos de demostración</button>
  </aside>
  <section class="phone-wrap" aria-label="Vista de la aplicación móvil">
   <div class="phone"><div class="statusbar"><span>9:41</span><span class="island"></span><span>▮▮▮ &nbsp;▰</span></div><main id="app"></main><nav id="navigation" aria-label="Navegación principal"></nav><div class="home-indicator"></div></div>
@@ -20,5 +20,5 @@
 </div>
 <div id="toast" role="status" hidden></div>
 <dialog id="modal"><div id="modal-content"></div></dialog>
-<script src="domain.js"></script><script src="app.js"></script>
+<script src="domain.js"></script><script src="operations.js"></script><script src="app.js"></script><script src="modules.js"></script><script src="shifts.js"></script><script src="supabase.js"></script>
 </body></html>

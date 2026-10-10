@@ -22,6 +22,11 @@
 
 
 /* Begin PBXBuildFile section */
+		BB0000000000000000000005 /* ShiftScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000005; };
+		BB0000000000000000000004 /* OperationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000004; };
+		BB0000000000000000000003 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000003; };
+		BB0000000000000000000002 /* OperationsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002; };
+		BB0000000000000000000001 /* Operations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001; };
 		2A436304992E4EA4BCD3B3C2 /* PumaGasStationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717BBB28E2E346668718653D /* PumaGasStationApp.swift */; };
 		BF88DCB58E93474F8936EF36 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771916F5AE03454FBACD4A53 /* RootView.swift */; };
 		E1D84290661E455AB7F7E859 /* DailyCut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F16D48FB0747FCB1D48CE1 /* DailyCut.swift */; };
@@ -49,6 +54,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA0000000000000000000005 /* ShiftScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftScheduleView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000004 /* OperationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationsView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000003 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		AA0000000000000000000002 /* OperationsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationsStore.swift; sourceTree = "<group>"; };
+		AA0000000000000000000001 /* Operations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operations.swift; sourceTree = "<group>"; };
 		717BBB28E2E346668718653D /* PumaGasStationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PumaGasStationApp.swift"; sourceTree = "<group>"; };
 		771916F5AE03454FBACD4A53 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
 		87F16D48FB0747FCB1D48CE1 /* DailyCut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DailyCut.swift"; sourceTree = "<group>"; };
@@ -120,6 +130,8 @@
 		EA56E63FCE8A4F338409EDD6 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AA0000000000000000000003 /* SupabaseService.swift */,
+				AA0000000000000000000002 /* OperationsStore.swift */,
 				BC8054E45F464C7598A5D732 /* MockDataService.swift */,
 			);
 			path = "Services";
@@ -128,6 +140,7 @@
 		0FA39BD5C0FA4ECAB7F083CC /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				AA0000000000000000000001 /* Operations.swift */,
 				87F16D48FB0747FCB1D48CE1 /* DailyCut.swift */,
 				EC89D7DCB4C34C67A0677C93 /* FuelType.swift */,
 				908A5BB893AF4B1BA1CF79F8 /* Pump.swift */,
@@ -150,6 +163,8 @@
 		5D9D1F720F174D5FB6A736FB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AA0000000000000000000005 /* ShiftScheduleView.swift */,
+				AA0000000000000000000004 /* OperationsView.swift */,
 				5F65A5FB9AC045F78DA8EB60 /* BranchManager */,
 				A304C069DF3D48608609A45E /* Components */,
 				D8CDF96B6E42449FA80ED53B /* GeneralManager */,
@@ -279,6 +294,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB0000000000000000000005 /* ShiftScheduleView.swift in Sources */,
+				BB0000000000000000000004 /* OperationsView.swift in Sources */,
+				BB0000000000000000000003 /* SupabaseService.swift in Sources */,
+				BB0000000000000000000002 /* OperationsStore.swift in Sources */,
+				BB0000000000000000000001 /* Operations.swift in Sources */,
 				2A436304992E4EA4BCD3B3C2 /* PumaGasStationApp.swift in Sources */,
 				BF88DCB58E93474F8936EF36 /* RootView.swift in Sources */,
 				E1D84290661E455AB7F7E859 /* DailyCut.swift in Sources */,

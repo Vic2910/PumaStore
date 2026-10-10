@@ -26,11 +26,20 @@ final class MockDataService: ObservableObject {
                 let snapshot = try JSONDecoder().decode(Snapshot.self, from: data)
                 stations = snapshot.stations
                 users = snapshot.users
+                if snapshot.tankCapacityVersion != 1 {
+                    guard stations.allSatisfy({ $0.tanks.allSatisfy { $0.currentGallons <= 10000 } }) else {
+                        throw StoreError.invalid("Una existencia supera 10,000 galones. Revisa la capacidad física antes de migrar; el archivo original se conserva.")
+                    }
+                    for stationIndex in stations.indices {
+                        for tankIndex in stations[stationIndex].tanks.indices { stations[stationIndex].tanks[tankIndex].capacityGallons = 10000 }
+                    }
+                    try persist()
+                }
             } catch {
                 storageError = "No se pudo abrir el archivo de datos. No se sobrescribió: \(error.localizedDescription)"
             }
         } else {
-            seedData()
+            if customStorageURL != nil { seedData() }
             do { try persist() } catch { storageError = error.localizedDescription }
         }
     }
@@ -48,7 +57,7 @@ final class MockDataService: ObservableObject {
 
     func authenticate(usuario: String, password: String) -> User? {
         guard !password.isEmpty else { return nil }
-        return users.first { $0.usuario.lowercased() == usuario.lowercased() && $0.password == password }
+        return users.first { $0.isActive && $0.usuario.lowercased() == usuario.lowercased() && $0.password == password }
     }
 
     // MARK: - Mutaciones (Gerente General)
@@ -59,9 +68,9 @@ final class MockDataService: ObservableObject {
             direccion: direccion,
             ciudad: ciudad,
             tanks: [
-                Tank(fuelType: .súper, capacityGallons: 8000, currentGallons: 0),
-                Tank(fuelType: .regular, capacityGallons: 8000, currentGallons: 0),
-                Tank(fuelType: .diésel, capacityGallons: 8000, currentGallons: 0)
+                Tank(fuelType: .súper, capacityGallons: 10000, currentGallons: 0),
+                Tank(fuelType: .regular, capacityGallons: 10000, currentGallons: 0),
+                Tank(fuelType: .diésel, capacityGallons: 10000, currentGallons: 0)
             ],
             cuts: [],
             gerenteNombre: gerenteNombre
@@ -86,7 +95,7 @@ final class MockDataService: ObservableObject {
         stations[idx] = station
     }
 
-    struct Snapshot: Codable { var stations: [Station]; var users: [User] }
+    struct Snapshot: Codable { var stations: [Station]; var users: [User]; var tankCapacityVersion: Int? = 1 }
     private var storageURL: URL {
         customStorageURL ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("PumaGasStation/data.json")
@@ -155,14 +164,14 @@ final class MockDataService: ObservableObject {
             Tank(fuelType: .diésel, capacityGallons: 10000, currentGallons: 1800)
         ]
         let tanksSanSalvador = [
-            Tank(fuelType: .súper, capacityGallons: 12000, currentGallons: 9000),
-            Tank(fuelType: .regular, capacityGallons: 12000, currentGallons: 7800),
-            Tank(fuelType: .diésel, capacityGallons: 12000, currentGallons: 6600)
+            Tank(fuelType: .súper, capacityGallons: 10000, currentGallons: 9000),
+            Tank(fuelType: .regular, capacityGallons: 10000, currentGallons: 7800),
+            Tank(fuelType: .diésel, capacityGallons: 10000, currentGallons: 6600)
         ]
         let tanksSonsonate = [
-            Tank(fuelType: .súper, capacityGallons: 9000, currentGallons: 2000),
-            Tank(fuelType: .regular, capacityGallons: 9000, currentGallons: 4700),
-            Tank(fuelType: .diésel, capacityGallons: 9000, currentGallons: 4500)
+            Tank(fuelType: .súper, capacityGallons: 10000, currentGallons: 2000),
+            Tank(fuelType: .regular, capacityGallons: 10000, currentGallons: 4700),
+            Tank(fuelType: .diésel, capacityGallons: 10000, currentGallons: 4500)
         ]
 
         func samplePumps() -> [PumpReading] {

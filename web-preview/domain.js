@@ -18,8 +18,8 @@ function seed(){
  const santa=morning();santa.purchases=[{id:id(),fuel:'Diésel',volume:1000,cost:3950,supplier:'RECOPE'}];santa.losses=[{id:id(),fuel:'Regular',volume:5,reason:'Derrame menor en manguera'}];
  return {version:1,stations:[
  {id:'santa',name:'PUMA Santa Ana Centro',city:'Santa Ana',address:'Av. Independencia Sur',manager:'Abigail Rivera',tanks:fuels.map((fuel,i)=>({fuel,capacity:10000,current:[7200,4500,1800][i]})),cuts:[santa,blankCut('vespertino')]},
- {id:'salvador',name:'PUMA San Salvador Norte',city:'San Salvador',address:'Bulevar Constitución',manager:'Ana Rivas',tanks:fuels.map((fuel,i)=>({fuel,capacity:12000,current:[9000,7800,6600][i]})),cuts:[morning()]},
- {id:'sonsonate',name:'PUMA Sonsonate Km 65',city:'Sonsonate',address:'Carretera CA-8',manager:'José Portillo',tanks:fuels.map((fuel,i)=>({fuel,capacity:9000,current:[2000,4700,4500][i]})),cuts:[blankCut('matutino')]}
+ {id:'salvador',name:'PUMA San Salvador Norte',city:'San Salvador',address:'Bulevar Constitución',manager:'Ana Rivas',tanks:fuels.map((fuel,i)=>({fuel,capacity:10000,current:[9000,7800,6600][i]})),cuts:[morning()]},
+ {id:'sonsonate',name:'PUMA Sonsonate Km 65',city:'Sonsonate',address:'Carretera CA-8',manager:'José Portillo',tanks:fuels.map((fuel,i)=>({fuel,capacity:10000,current:[2000,4700,4500][i]})),cuts:[blankCut('matutino')]}
  ],users:[
  {id:'general',name:'Gabriela Díaz',username:'gerente.general',password:'1234',role:'general',stationId:null},
  {id:'abigail',name:'Abigail Rivera',username:'santa.ana',password:'1234',role:'branch',stationId:'santa'},
@@ -53,7 +53,7 @@ function saveCut(data,stationId,draft,close=false){
 }
 function aggregate(stations,date=day()){
  const cuts=stations.flatMap(s=>s.cuts).filter(c=>c.closed&&(!date||c.date===date));
- const values=cuts.map(totals);return {sales:sum(values,'sales'),volume:sum(values,'volume'),purchases:sum(values,'purchases'),losses:sum(values,'losses')};
+ const values=cuts.map(totals),receipts=stations.flatMap(s=>s.receipts||[]).filter(r=>!date||day(new Date(r.date))===date);return {sales:sum(values,'sales'),volume:sum(values,'volume'),purchases:sum(values,'purchases')+sum(receipts,'cost'),losses:sum(values,'losses')};
 }
 function globalTanks(stations){return fuels.map(fuel=>({fuel,current:sum(stations.flatMap(s=>s.tanks).filter(t=>t.fuel===fuel),'current'),capacity:sum(stations.flatMap(s=>s.tanks).filter(t=>t.fuel===fuel),'capacity')}));}
 function assign(data,userId,stationId){
@@ -65,7 +65,7 @@ function assign(data,userId,stationId){
 }
 function addStation(data,fields){
  assert(fields.name.trim()&&fields.city.trim()&&fields.address.trim(),'Completa nombre, dirección y ciudad.');
- const next=clone(data);next.stations.push({id:id(),name:fields.name.trim(),city:fields.city.trim(),address:fields.address.trim(),manager:'Sin asignar',tanks:fuels.map(fuel=>({fuel,capacity:8000,current:0})),cuts:[]});return next;
+ const next=clone(data);next.stations.push({id:id(),name:fields.name.trim(),city:fields.city.trim(),address:fields.address.trim(),manager:'Sin asignar',tanks:fuels.map(fuel=>({fuel,capacity:10000,current:0})),cuts:[]});return next;
 }
 function addManager(data,fields){
  assert(fields.name.trim()&&fields.username.trim()&&fields.password.length>=4,'Completa los datos y una contraseña de al menos 4 caracteres.');

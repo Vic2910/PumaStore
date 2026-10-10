@@ -1,6 +1,7 @@
 import SwiftUI
 struct RootView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @ObservedObject private var remote = SupabaseService.shared
     var body: some View {
         Group {
             if let user = authViewModel.currentUser {
@@ -9,6 +10,8 @@ struct RootView: View {
                 else { NavigationStack { ProfileView() } }
             } else { LoginView() }
         }.tint(PumaStyle.green).preferredColorScheme(.light)
+            .disabled(remote.busy)
+            .overlay(alignment: .top) { if remote.busy { ProgressView("Conectando con Supabase…").padding(10).background(.regularMaterial).clipShape(Capsule()) } }
     }
 }
 struct GeneralShell: View {
@@ -19,7 +22,7 @@ struct GeneralShell: View {
             NavigationStack { StationManagementView() }.tabItem { Label("Sucursales", systemImage: "mappin.and.ellipse") }
             NavigationStack { ManagersView() }.tabItem { Label("Gerentes", systemImage: "person.2") }
             NavigationStack { PerformanceView() }.tabItem { Label("Reportes", systemImage: "chart.bar.xaxis") }
-            NavigationStack { ProfileView() }.tabItem { Label("Más", systemImage: "line.3.horizontal") }
+            NavigationStack { OperationsMenuView() }.tabItem { Label("Más", systemImage: "line.3.horizontal") }
         }.environmentObject(model)
     }
 }
@@ -32,7 +35,7 @@ struct BranchShell: View {
             NavigationStack { DailyCutsView() }.tabItem { Label("Cortes", systemImage: "doc.text") }
             NavigationStack { InventoryView() }.tabItem { Label("Inventario", systemImage: "drop") }
             NavigationStack { PumpsView() }.tabItem { Label("Bombas", systemImage: "waveform.path.ecg") }
-            NavigationStack { ProfileView() }.tabItem { Label("Perfil", systemImage: "person") }
+            NavigationStack { OperationsMenuView() }.tabItem { Label("Más", systemImage: "line.3.horizontal") }
         }.environmentObject(model)
     }
 }

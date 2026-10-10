@@ -2,6 +2,87 @@ import XCTest
 @testable import PumaGasStation
 
 final class BusinessRulesTests: XCTestCase {
+    func testPerformanceCombinesHistoricalIncomeAndFiltersLocalDays() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let local = MockDataService(storageURL: folder.appendingPathComponent("stations.json"))
+        let operations = OperationsStore(storageURL: folder.appendingPathComponent("operations.json"))
+        let date = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-09T12:00:00Z"))
+        let branch = UUID(), other = UUID(), product = UUID(), service = UUID(), employee = UUID()
+        let pump = PumpReading(pumpNumber: 1, fuelType: .súper, ventasGalones: 10, ventasMonto: 100, completado: true)
+        let closed = DailyCut(fecha: date, shift: .matutino, pumps: [pump], cerrado: true)
+        let draft = DailyCut(fecha: date, shift: .vespertino, pumps: [pump], cerrado: false)
+        local.stations = [Station(id: branch, nombre: "A", direccion: "Calle", ciudad: "Ciudad", tanks: [], cuts: [closed, draft], gerenteNombre: ""), Station(id: other, nombre: "B", direccion: "Calle", ciudad: "Ciudad", tanks: [], cuts: [closed], gerenteNombre: "")]
+        var snapshot = OperationsData()
+        let line = SaleLine(productID: product, name: "Aceite", sku: "OIL", price: 10, quantity: 2)
+        snapshot.sales = [CommercialSale(stationID: branch, date: "2026-10-07T06:00:00Z", cashier: "Ana", lines: [line], payment: "Efectivo", received: 20), CommercialSale(stationID: branch, date: "2026-10-07T05:59:59Z", cashier: "Ana", lines: [line], payment: "Efectivo", received: 20), CommercialSale(stationID: other, date: "2026-10-08T12:00:00Z", cashier: "Ana", lines: [line], payment: "Efectivo", received: 20)]
+        snapshot.records = ["Completado", "Pendiente", "En proceso", "Cancelado"].map { ServiceRecord(stationID: branch, serviceID: service, name: "Lavado", employeeID: employee, date: "2026-10-08T12:00:00Z", price: 30, vehicle: "", notes: "", status: $0) }
+        XCTAssertTrue(operations.restore(snapshot))
+        let model = GeneralManagerViewModel(dataService: local, operationsStore: operations)
+        model.selectedStationID = branch
+        let report = model.performanceReport(days: 3, ending: date)
+        XCTAssertEqual(report.summary.fuel, 100)
+        XCTAssertEqual(report.summary.products, 20)
+        XCTAssertEqual(report.summary.services, 30)
+        XCTAssertEqual(report.summary.total, 150)
+        XCTAssertEqual(report.summary.revenue(.products), 20)
+        XCTAssertEqual(report.summary.units, 2)
+        XCTAssertEqual(report.summary.completed, 1)
+        XCTAssertEqual(report.summary.pending, 2)
+        XCTAssertEqual(report.summary.cancelled, 1)
+        XCTAssertEqual(report.points.map(\.total), [20, 30, 100])
+        model.selectedStationID = nil
+        XCTAssertEqual(model.performanceReport(days: 3, ending: date).summary.total, 270)
+        // A remote refresh changes the observable report without rebuilding the view model.
+        snapshot.sales.removeAll()
+        XCTAssertTrue(operations.restore(snapshot))
+        XCTAssertEqual(model.performanceReport(days: 3, ending: date).summary.products, 0)
+    }
+    func testShiftCancellationRetainsHistoryAndReleasesSchedule() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let operations = OperationsStore(storageURL: url), stationID = UUID()
+        let employee = Employee(stationID: stationID, name: "José", document: "DOC-1", phone: "555", email: "", position: "Despachador", hireDate: "2026-10-01T00:00:00Z")
+        XCTAssertTrue(operations.saveEmployee(employee))
+        var shift = WorkShift(stationID: stationID, employeeID: employee.id, start: "2026-10-13T04:00:00Z", end: "2026-10-13T12:00:00Z")
+        shift.type = "Noche"
+        XCTAssertTrue(operations.saveShift(shift))
+        XCTAssertEqual(shift.status, "Programado")
+        XCTAssertTrue(operations.cancelShift(shift.id))
+        XCTAssertEqual(operations.data.shifts[0].status, "Cancelado")
+        XCTAssertFalse(operations.clock(shift.id))
+        var replacement = shift; replacement.id = UUID()
+        XCTAssertTrue(operations.saveShift(replacement))
+        XCTAssertEqual(operations.data.shifts.count, 2)
+    }
+    func testNewStationCapacityAndInactiveManager() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        let local = MockDataService(storageURL: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+        XCTAssertTrue(local.stations.allSatisfy { $0.tanks.allSatisfy { $0.capacityGallons == 10000 } })
+        local.addStation(nombre: "Nueva", direccion: "Calle", ciudad: "Ciudad", gerenteNombre: "")
+        XCTAssertTrue(local.stations.last!.tanks.allSatisfy { $0.capacityGallons == 10000 })
+        let model = GeneralManagerViewModel(dataService: local)
+        let manager = local.users.first { $0.role == .gerenteSucursal }!
+        XCTAssertTrue(model.setManagerActive(userID: manager.id, active: false))
+        XCTAssertNil(local.authenticate(usuario: manager.usuario, password: "1234"))
+    }
+    func testCommercialSaleIsAtomicAndKeepsPriceHistory() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let operations = OperationsStore(storageURL: url), station = UUID()
+        var product = CommercialProduct(stationID: station, name: "Aceite", sku: "LUB-1", category: "Lubricantes", price: 10, cost: 5, stock: 5, minimum: 2)
+        XCTAssertTrue(operations.saveProduct(product))
+        XCTAssertFalse(operations.sell(stationID: station, quantities: [product.id: 6], cashier: "Carlos", payment: "Efectivo", received: 100))
+        XCTAssertEqual(operations.data.products[0].stock, 5)
+        operations.error = nil
+        XCTAssertTrue(operations.sell(stationID: station, quantities: [product.id: 2], cashier: "Carlos", payment: "Efectivo", received: 25))
+        XCTAssertEqual(operations.data.products[0].stock, 3)
+        XCTAssertEqual(operations.data.sales[0].change, 5)
+        product.stock = 3; product.price = 99
+        XCTAssertTrue(operations.saveProduct(product))
+        XCTAssertEqual(operations.data.sales[0].total, 20)
+    }
     private var store: MockDataService!
     private var directory: URL!
     override func setUpWithError() throws {

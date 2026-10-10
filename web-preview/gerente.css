@@ -1,0 +1,125 @@
+/* Only gerente.html uses this layout. The mobile preview keeps styles.css. */
+.general-web{background:#f4f6f5;font-size:15px;min-height:100vh}
+.general-web .portal-header{height:80px;background:white;border-bottom:1px solid #e3e9e5;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 32px;position:sticky;top:0;z-index:3}
+.general-web .portal-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#183e2a;font-size:21px;font-weight:750}
+.general-web .portal-brand img{width:42px;height:42px;border-radius:10px}
+.general-web .portal-brand small{display:block;font-size:11px;font-weight:500;letter-spacing:.2px;margin-top:3px}
+.general-web .portal-account{text-align:right;font-size:14px;font-weight:600;margin-left:auto}
+.general-web .portal-account small{display:block;margin-top:4px;font-weight:400}
+.general-web .portal-layout{display:grid;grid-template-columns:242px minmax(0,1fr);max-width:1800px;margin:0 auto}
+.general-web .portal-sidebar{position:sticky;top:80px;height:calc(100dvh - 80px);overflow:auto;background:white;border-right:1px solid #e3e9e5;padding:20px 14px}
+.general-web .portal-nav-label{font-size:11px;font-weight:700;color:#829289;letter-spacing:.7px;text-transform:uppercase;padding:5px 14px 14px}
+.general-web .portal-nav button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;min-height:46px;padding:12px 14px;margin-bottom:4px;border-radius:8px;color:#596a60;font-size:13px}
+.general-web .portal-nav button:hover{background:#f4f8f5}
+.general-web .portal-nav button.active{background:#e4f7ec;color:#008b40;font-weight:650;box-shadow:inset 3px 0 var(--green)}
+.general-web .portal-nav .icon{width:19px;height:19px;flex-shrink:0}
+.general-web .portal-nav .portal-logout{border-top:1px solid #e3e9e5;margin-top:16px;border-radius:0;color:#a4433f}
+.general-web .portal-nav-group{margin:0 0 8px;color:inherit;font-size:13px;line-height:normal}
+.general-web .portal-nav-group summary{display:flex;align-items:center;gap:10px;min-height:46px;padding:12px;border-radius:8px;list-style:none;font-weight:650;color:#596a60}
+.general-web .portal-nav-group summary::-webkit-details-marker{display:none}
+.general-web .portal-nav-group summary:hover{background:#f4f8f5}
+.general-web .portal-nav-group.has-active-page summary{color:#008b40}
+.general-web .portal-group-chevron{margin-left:auto;font-size:23px;line-height:16px;transform:rotate(0deg)}
+.general-web .portal-nav-group[open] .portal-group-chevron{transform:rotate(90deg)}
+.general-web .portal-group-items{padding:5px 0 3px 10px;margin-left:20px;border-left:1px solid #e3e9e5}
+.general-web .portal-group-items button{padding:10px;gap:9px;font-size:12px;min-height:44px}
+.general-web .portal-group-items .icon{width:16px;height:16px}
+.general-web .preview-link{display:block;color:#76887e;text-decoration:none;font-size:12px;padding:16px 14px}
+.general-web #app{padding:32px;overflow:visible;min-width:0;scroll-margin-top:95px}
+.general-web h2{font-size:27px;letter-spacing:-.6px}
+.general-web h3{font-size:16px}
+.general-web small{font-size:12px}
+.general-web .card{padding:20px;border:1px solid #e7ece9;border-radius:12px;margin-bottom:20px}
+.general-web .card h3{margin-bottom:16px}
+.general-web .metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}
+.general-web .metric{padding:20px;min-height:115px;border:1px solid #e1e9e4;box-shadow:0 2px 4px #183e2a03}
+.general-web .metric-title{font-size:13px;margin-bottom:18px}
+.general-web .metric strong{font-size:26px}
+.general-web .metric .bubble{width:30px;height:30px;right:16px;top:16px;background:#e4f7ec;color:var(--green)}
+.general-web #app>.brand{display:none}
+.general-web .welcome{font-size:26px;margin-bottom:24px}
+.general-web .primary,.general-web .outline{font-size:13px;min-height:42px;padding:11px 16px}
+.general-web .page-head .primary{min-height:42px;font-size:13px}
+.general-web input,.general-web select,.general-web textarea{font-size:14px;min-height:42px;padding:11px 12px}
+.general-web label{font-size:12px;margin:12px 0}
+.general-web label input,.general-web label select{font-size:14px}
+.general-web .search input{padding:13px 14px}
+.general-web .shift-subtitle,.general-web .shift-meta{font-size:12px}
+.general-web .shift-info-row{font-size:13px;padding:12px 0}
+.general-web .shift-row b{font-size:15px}
+.general-web .shift-row p{font-size:13px}
+.general-web .shift-row small{font-size:12px}
+.general-web .shift-badge,.general-web .badge{font-size:11px;padding:5px 8px}
+.general-web .shift-filters{gap:18px}
+.general-web .shift-filters label{font-size:12px}
+.general-web .shift-filters input,.general-web .shift-filters select{font-size:14px;padding:11px}
+.general-web .shift-summary strong{font-size:23px}
+.general-web .shift-summary small{font-size:11px}
+.general-web .shift-presets button{font-size:14px;min-height:66px}
+.general-web .shift-presets small{font-size:12px}
+.general-web .shift-warning,.general-web .shift-error,.general-web .shift-success{font-size:13px;padding:16px}
+.general-web .shift-sticky,.general-web .cut-footer{bottom:0;background:#f4f6f5;padding:16px 0;margin-top:20px;z-index:1}
+.general-web .buttons{display:flex;flex-wrap:wrap;gap:12px}
+.general-web .pills{flex-wrap:wrap;white-space:normal;gap:10px;margin-bottom:24px}
+.general-web .pill{font-size:12px;min-height:38px;padding:9px 14px}
+.general-web .performance-row{font-size:14px;margin-bottom:20px}
+.general-web .fuel-sales .row{font-size:14px;margin:15px 0}
+.general-web .gauge{padding:18px}
+.general-web .gauge-name,.general-web .gauge strong{font-size:14px}
+.general-web .gauge small{font-size:12px}
+.general-web .tank{height:90px;width:42px}
+.general-web .chart{height:260px}
+.general-web .segmented{padding:5px;gap:5px}
+.general-web .segmented button{font-size:13px;padding:12px;min-height:42px}
+.general-web .alert{font-size:14px;padding:16px}
+.general-web .alert p{font-size:12px}
+.general-web .section-title{font-size:16px}
+.general-web .station-button b{font-size:16px}
+.general-web .station-button p,.general-web .station-button small{font-size:13px}
+.general-web .cart-line{font-size:14px;padding:14px 0}
+.general-web .cart-line input{width:76px}
+.general-web .add-product{width:40px;height:40px}
+.general-web .service-heading{font-size:15px}
+.general-web .service-notes{font-size:14px}
+.general-web .report-stats{gap:20px}
+.general-web dialog{width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;padding:28px}
+.general-web dialog h2{font-size:23px}
+.general-web dialog p,.general-web .dialog-error{font-size:13px}
+.general-web #modal:has(form[data-module]) legend{font-size:14px}
+.general-web #modal:has(form[data-module]) h2{font-size:23px}
+.general-web #modal:has(form[data-module]) .buttons{background:var(--bg)}
+.general-web .portal-menu{display:none}
+.general-web:not(.portal-authenticated) .portal-layout{display:block}
+.general-web:not(.portal-authenticated) .portal-sidebar{display:none}
+.general-web:not(.portal-authenticated) #app{max-width:520px;margin:48px auto;padding:32px;background:white;border:1px solid #e3e9e5;border-radius:16px}
+.general-web .login{padding-top:0}
+.general-web .login input{background:#f2f4f3;border:1px solid #e3e9e5}
+.general-web .login p{font-size:14px}
+.general-web .skip-content{position:fixed;top:-100px;left:20px;z-index:5;background:white;color:#008b40;padding:12px;border-radius:8px}
+.general-web .skip-content:focus{top:12px}
+@media(min-width:1150px){
+ .general-web #app[data-portal-page="dashboard"]{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;align-content:start;align-items:start}
+ .general-web #app[data-portal-page="dashboard"]>.brand,.general-web #app[data-portal-page="dashboard"]>.welcome,.general-web #app[data-portal-page="dashboard"]>.metrics,.general-web #app[data-portal-page="dashboard"]>.pills,.general-web #app[data-portal-page="dashboard"]>.section-title,.general-web #app[data-portal-page="dashboard"]>.alert,.general-web #app[data-portal-page="dashboard"]>.empty,.general-web #app[data-portal-page="dashboard"]>.wide{grid-column:1/-1}
+ .general-web #app[data-portal-page="stations"] #station-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}
+}
+@media(max-width:1149px){.general-web .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.general-web #app{padding:24px}.general-web .portal-layout{grid-template-columns:218px minmax(0,1fr)}}
+@media(max-width:760px){
+ .general-web .portal-header{height:68px;padding:0 16px;gap:12px}
+ .general-web .portal-brand{font-size:18px}.general-web .portal-brand img{width:34px;height:34px}.general-web .portal-brand small{display:none}
+ .general-web .portal-account{font-size:12px;max-width:130px}.general-web .portal-account small{font-size:10px}
+ .general-web .portal-layout{display:block}.general-web .portal-menu{display:block;font-size:12px;padding:8px 12px}
+ .general-web .portal-sidebar{display:none;position:fixed;inset:68px 0 0;z-index:2;height:calc(100dvh - 68px);padding:16px;overflow:auto;border:0}
+ .general-web.portal-menu-open .portal-sidebar{display:block}
+ .general-web #app{padding:20px 16px;scroll-margin-top:80px}
+ .general-web h2{font-size:23px}.general-web .welcome{font-size:23px}
+ .general-web .metrics{gap:10px}.general-web .metric{padding:14px;min-height:105px}.general-web .metric strong{font-size:22px}.general-web .metric-title{font-size:12px;max-width:80%}.general-web .metric .bubble{right:10px;top:10px;width:24px;height:24px}
+ .general-web .card{padding:16px;margin-bottom:16px}
+ .general-web .segmented button{font-size:11px;padding:10px 4px}
+ .general-web .chart{height:210px}.general-web .shift-filters{gap:10px}.general-web .shift-summary{padding:12px 4px}
+ .general-web .gauge{padding:12px 4px}.general-web .gauge small{font-size:10px}
+ .general-web .report-stats{gap:10px}.general-web .report-stats .card strong{font-size:17px}
+ .general-web:not(.portal-authenticated) #app{margin:24px 16px;max-width:none;padding:24px}
+ .general-web .page-head{align-items:flex-start}.general-web .row{flex-wrap:wrap}
+ .general-web dialog{padding:20px}.general-web .shift-info-row b{overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:no-preference){.general-web .portal-nav button{transition:background .15s}}

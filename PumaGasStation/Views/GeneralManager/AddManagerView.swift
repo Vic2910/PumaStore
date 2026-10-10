@@ -19,7 +19,7 @@ struct AddManagerView: View {
             Form {
                 Section("Datos del gerente") {
                     TextField("Nombre completo", text: $nombre)
-                    TextField("Usuario", text: $usuario)
+                    TextField("Correo electrónico", text: $usuario).keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                     SecureField("Contraseña", text: $password)
@@ -43,7 +43,7 @@ struct AddManagerView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Guardar") {
                         guard let stationID = selectedStationID else { return }
-                        if viewModel.addManager(nombre: nombre, usuario: usuario, password: password, stationID: stationID) { dismiss() }
+                        Task { if await SupabaseService.shared.createManager(name: nombre, email: usuario, password: password, stationID: stationID) { dismiss() } else { viewModel.errorMessage = SupabaseService.shared.message } }
                     }
                     .disabled(nombre.isEmpty || usuario.isEmpty || password.isEmpty || selectedStationID == nil)
                 }

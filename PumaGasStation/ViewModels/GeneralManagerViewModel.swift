@@ -16,14 +16,16 @@ final class GeneralManagerViewModel: ObservableObject {
     @Published var reportURL: URL?
     @Published var managers: [User] = []
     @Published var stations: [Station] = []
+    @Published private(set) var operations = OperationsData()
     /// nil = panorama general del país; un id = vista filtrada por sucursal.
     @Published var selectedStationID: UUID?
 
-    init(dataService: MockDataService = .shared) {
+    init(dataService: MockDataService = .shared, operationsStore: OperationsStore = .shared) {
         self.dataService = dataService
         dataService.$users.map { $0.filter { $0.role == .gerenteSucursal } }.assign(to: &$managers)
         dataService.$stations
             .assign(to: &$stations)
+        operationsStore.$data.assign(to: &$operations)
     }
 
     var filteredStations: [Station] {
@@ -71,36 +73,106 @@ final class GeneralManagerViewModel: ObservableObject {
         filteredStations.flatMap(\.cuts).filter { $0.cerrado && MockDataService.calendar.isDate($0.fecha, inSameDayAs: Date()) }
     }
     var todaySales: Double { todayCuts.reduce(0) { $0 + $1.totalVentasMonto } }
-    var todayPurchases: Double { todayCuts.reduce(0) { $0 + $1.totalComprasMonto } }
+    var todayPurchases: Double {
+        todayCuts.reduce(0) { $0 + $1.totalComprasMonto } + filteredStations.flatMap(\.receipts).filter { receipt in
+            guard let date = ISO8601DateFormatter().date(from: receipt.date) else { return false }
+            return MockDataService.calendar.isDate(date, inSameDayAs: Date())
+        }.reduce(0) { $0 + $1.cost }
+    }
     var todayLosses: Double { todayCuts.reduce(0) { $0 + $1.totalPerdidasGalones } }
     var todayVolume: Double { todayCuts.reduce(0) { $0 + $1.totalVentasGalones } }
 
     // MARK: - Gestión administrativa
 
+    enum ReportCategory: String, CaseIterable, Identifiable {
+        case all = "Todas", fuel = "Combustible", products = "Productos", services = "Servicios"
+        var id: String { rawValue }
+    }
     struct ReportPoint: Identifiable {
         var date: Date
-        var sales: Double
+        var fuel = 0.0
+        var products = 0.0
+        var services = 0.0
+        var volume = 0.0
+        var losses = 0.0
+        var units = 0
+        var completed = 0
+        var pending = 0
+        var cancelled = 0
+        var total: Double { Self.round(fuel + products + services) }
+        static func round(_ value: Double) -> Double { (value * 100).rounded() / 100 }
+        func revenue(_ category: ReportCategory) -> Double {
+            switch category { case .all: total; case .fuel: fuel; case .products: products; case .services: services }
+        }
         var id: Date { date }
     }
-    private func reportCuts(days: Int) -> [DailyCut] {
-        let start = MockDataService.calendar.date(byAdding: .day, value: -(days - 1), to: MockDataService.calendar.startOfDay(for: Date()))!
-        return filteredStations.flatMap(\.cuts).filter { $0.cerrado && $0.fecha >= start && $0.fecha <= Date() }
+    struct ReportItem: Identifiable {
+        var id: UUID
+        var name: String
+        var count = 0
+        var revenue = 0.0
     }
-    func reportPoints(days: Int) -> [ReportPoint] {
-        let grouped = Dictionary(grouping: reportCuts(days: days)) { MockDataService.calendar.startOfDay(for: $0.fecha) }
-        return (0..<days).reversed().map { offset in
-            let day = MockDataService.calendar.date(byAdding: .day, value: -offset, to: MockDataService.calendar.startOfDay(for: Date()))!
-            return ReportPoint(date: day, sales: (grouped[day] ?? []).reduce(0) { $0 + $1.totalVentasMonto })
+    struct PerformanceReport {
+        var points: [ReportPoint]
+        var summary: ReportPoint
+        var fuelSales: [FuelType: Double]
+        var products: [ReportItem]
+        var services: [ReportItem]
+    }
+    func performanceReport(days: Int, ending: Date = Date(), stations reportStations: [Station]? = nil) -> PerformanceReport {
+        let calendar = MockDataService.calendar, end = calendar.startOfDay(for: ending)
+        let dates = (0..<max(1, min(days, 365))).reversed().map { calendar.date(byAdding: .day, value: -$0, to: end)! }
+        var points = Dictionary(uniqueKeysWithValues: dates.map { ($0, ReportPoint(date: $0)) })
+        let branches = reportStations ?? filteredStations
+        let ids = Set(branches.map(\.id))
+        var fuelSales: [FuelType: Double] = [:], productItems: [UUID: ReportItem] = [:], serviceItems: [UUID: ReportItem] = [:]
+        func day(_ text: String) -> Date? { ISO8601DateFormatter().date(from: text).map { calendar.startOfDay(for: $0) } }
+        for cut in branches.flatMap(\.cuts) where cut.cerrado {
+            let date = calendar.startOfDay(for: cut.fecha)
+            guard points[date] != nil else { continue }
+            points[date]!.fuel += cut.totalVentasMonto; points[date]!.volume += cut.totalVentasGalones; points[date]!.losses += cut.totalPerdidasGalones
+            for fuel in FuelType.allCases { fuelSales[fuel, default: 0] += cut.ventas(for: fuel) }
         }
+        for sale in operations.sales where ids.contains(sale.stationID) {
+            guard let date = day(sale.date), points[date] != nil else { continue }
+            points[date]!.products += sale.total
+            for line in sale.lines {
+                points[date]!.units += line.quantity
+                var item = productItems[line.productID] ?? ReportItem(id: line.productID, name: line.name)
+                item.count += line.quantity; item.revenue += line.total; productItems[line.productID] = item
+            }
+        }
+        for record in operations.records where ids.contains(record.stationID) {
+            guard let date = day(record.date), points[date] != nil else { continue }
+            if record.status == "Completado" {
+                points[date]!.services += record.price; points[date]!.completed += 1
+                var item = serviceItems[record.serviceID] ?? ReportItem(id: record.serviceID, name: record.name)
+                item.count += 1; item.revenue += record.price; serviceItems[record.serviceID] = item
+            } else if ["Pendiente", "En proceso"].contains(record.status) { points[date]!.pending += 1 }
+            else if record.status == "Cancelado" { points[date]!.cancelled += 1 }
+        }
+        let ordered = dates.map { date -> ReportPoint in
+            var p = points[date]!; p.fuel = ReportPoint.round(p.fuel); p.products = ReportPoint.round(p.products); p.services = ReportPoint.round(p.services); return p
+        }
+        var summary = ReportPoint(date: end)
+        for p in ordered { summary.fuel += p.fuel; summary.products += p.products; summary.services += p.services; summary.volume += p.volume; summary.losses += p.losses; summary.units += p.units; summary.completed += p.completed; summary.pending += p.pending; summary.cancelled += p.cancelled }
+        summary.fuel = ReportPoint.round(summary.fuel); summary.products = ReportPoint.round(summary.products); summary.services = ReportPoint.round(summary.services)
+        return PerformanceReport(points: ordered, summary: summary, fuelSales: fuelSales, products: productItems.values.sorted { $0.revenue > $1.revenue }, services: serviceItems.values.sorted { $0.revenue > $1.revenue })
     }
-    func reportSales(fuel: FuelType, days: Int) -> Double { reportCuts(days: days).reduce(0) { $0 + $1.ventas(for: fuel) } }
-    func csvReport(days: Int) -> String {
-        "Fecha,Ventas USD\n" + reportPoints(days: days).map { "\($0.date.formatted(.iso8601)),\($0.sales)" }.joined(separator: "\n")
+    func previousReport(days: Int) -> PerformanceReport {
+        performanceReport(days: days, ending: MockDataService.calendar.date(byAdding: .day, value: -days, to: Date())!)
     }
-    func prepareCSV(days: Int) {
+    func csvReport(days: Int, category: ReportCategory = .all) -> String {
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = MockDataService.calendar.timeZone; formatter.dateFormat = "yyyy-MM-dd"
+        func amount(_ value: Double) -> String { String(format: "%.2f", locale: Locale(identifier: "en_US_POSIX"), value) }
+        return "Fecha,Combustible USD,Productos USD,Servicios completados USD,Ingresos totales USD,Ingresos actividad seleccionada USD,Galones vendidos,Perdidas gal,Unidades productos,Servicios completados,Servicios pendientes,Servicios cancelados\n" + performanceReport(days: days).points.map { p in
+            [formatter.string(from: p.date), amount(p.fuel), amount(p.products), amount(p.services), amount(p.total), amount(p.revenue(category)), amount(p.volume), amount(p.losses), String(p.units), String(p.completed), String(p.pending), String(p.cancelled)].joined(separator: ",")
+        }.joined(separator: "\n")
+    }
+    func prepareCSV(days: Int, category: ReportCategory = .all) {
         do {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("PUMA-Reporte-\(days)-dias.csv")
-            try Data(csvReport(days: days).utf8).write(to: url, options: .atomic)
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("PUMA-Reporte-\(days)-dias-\(category.rawValue).csv")
+            try Data(csvReport(days: days, category: category).utf8).write(to: url, options: .atomic)
             reportURL = url
         } catch { reportURL = nil; errorMessage = error.localizedDescription }
     }
@@ -133,9 +205,19 @@ final class GeneralManagerViewModel: ObservableObject {
             guard manager.password == password else { throw MockDataService.StoreError.invalid("No se pudo guardar la credencial en el llavero del dispositivo.") }
         }
     }
+    func setManagerActive(userID: UUID, active: Bool) -> Bool {
+        commit {
+            guard let index = dataService.users.firstIndex(where: { $0.id == userID && $0.role == .gerenteSucursal }) else { throw MockDataService.StoreError.invalid("Gerente inexistente.") }
+            if !active {
+                if let branch = dataService.stations.firstIndex(where: { $0.id == dataService.users[index].stationID }) { dataService.stations[branch].gerenteNombre = "Sin asignar" }
+                dataService.users[index].stationID = nil
+            }
+            dataService.users[index].active = active
+        }
+    }
     func assignManager(userID: UUID, stationID: UUID?) -> Bool {
         commit {
-            guard let index = dataService.users.firstIndex(where: { $0.id == userID && $0.role == .gerenteSucursal }) else {
+            guard let index = dataService.users.firstIndex(where: { $0.id == userID && $0.role == .gerenteSucursal && $0.isActive }) else {
                 throw MockDataService.StoreError.invalid("Gerente inexistente.")
             }
             if let stationID, !dataService.stations.contains(where: { $0.id == stationID }) { throw MockDataService.StoreError.invalid("Sucursal inexistente.") }

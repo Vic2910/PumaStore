@@ -19,7 +19,9 @@ struct User: Identifiable, Codable, Equatable, Hashable {
         get { CredentialStore.read(id: id) ?? "" }
         set { CredentialStore.write(newValue, id: id) }
     }
-    enum CodingKeys: String, CodingKey { case id, nombre, usuario, role, stationID }
+    enum CodingKeys: String, CodingKey { case id, nombre, usuario, role, stationID, active }
+    var active: Bool? = true
+    var isActive: Bool { active != false }
     var role: UserRole
     /// Solo aplica a Gerente de Sucursal: id de la estación asignada.
     var stationID: UUID?
