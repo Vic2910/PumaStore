@@ -9,6 +9,11 @@ import Security
 enum UserRole: String, Codable {
     case gerenteGeneral = "Gerente General"
     case gerenteSucursal = "Gerente de Sucursal"
+    case vendedor = "Vendedor"
+    case despachador = "Despachador"
+    static func remote(_ value: String) -> UserRole {
+        switch value { case "general": return .gerenteGeneral; case "seller": return .vendedor; case "dispatcher": return .despachador; default: return .gerenteSucursal }
+    }
 }
 
 struct User: Identifiable, Codable, Equatable, Hashable {

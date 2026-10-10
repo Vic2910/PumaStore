@@ -7,6 +7,7 @@ struct RemoteProfile: Identifiable, Codable {
     var role: String
     var station_id: UUID?
     var active: Bool
+    var employee_id: UUID?
 }
 struct StationDocument: Codable { var station: Station; var operations: OperationsData }
 struct RemoteStation: Codable { var id: UUID; var revision: Int; var document: StationDocument }
@@ -18,8 +19,13 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
     @Published var publicKey = UserDefaults.standard.string(forKey: "supabaseKey") ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpvc2ZuZWdvbm1wcGZvcWJwYm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NzIwMDEsImV4cCI6MjEwNzE0ODAwMX0.U_ezjP7NIMtKES9LTFUN0MXXrGQzYAtFo_14tOHKUsA"
     @Published private(set) var profile: RemoteProfile?
     @Published private(set) var profiles: [RemoteProfile] = []
-    @Published var message = "Sin conexión remota. Los datos de demostración son locales."
+    @Published var message = "Inicia sesión para consultar tus datos."
     @Published var busy = false
+    @Published private(set) var sessions: [EmployeeSession] = []
+    @Published private(set) var registerSales: [RegisterSale] = []
+    @Published private(set) var closures: [OperationalClosure] = []
+    @Published private(set) var prices: [FuelPrice] = []
+    @Published private(set) var worker: WorkerContext?
     private var token: String?
     private var revisions: [UUID: Int] = [:]
     private var baseDocuments: [UUID: Data] = [:]
@@ -28,7 +34,7 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
     private var refreshTask: Task<Void, Never>?
     private weak var auth: AuthViewModel?
     private func request(_ path: String, method: String = "GET", body: Data? = nil, retry: Bool = true) async throws -> Data {
-        guard let endpoint = URL(string: url + path), endpoint.scheme == "https", !publicKey.isEmpty else { throw MockDataService.StoreError.invalid("Configura la URL HTTPS y la clave pública de Supabase.") }
+        guard let endpoint = URL(string: url + path), endpoint.scheme == "https", !publicKey.isEmpty else { throw MockDataService.StoreError.invalid("El servicio no está disponible. Contacta al administrador.") }
         var request = URLRequest(url: endpoint); request.httpMethod = method; request.httpBody = body
         request.setValue(publicKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(token ?? publicKey)", forHTTPHeaderField: "Authorization")
@@ -44,10 +50,9 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
         guard let response = response as? HTTPURLResponse, (200...299).contains(response.statusCode) else {
             let error = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
             if error?["error_code"] as? String == "email_not_confirmed" {
-                throw MockDataService.StoreError.invalid("Confirma tu correo antes de iniciar sesión. Revisa el mensaje de Supabase en tu bandeja de entrada o spam y abre el enlace de confirmación. Después vuelve a iniciar sesión.")
+                throw MockDataService.StoreError.invalid("Confirma tu correo antes de iniciar sesión. Revisa el mensaje de confirmación en tu bandeja de entrada o spam y abre el enlace de confirmación. Después vuelve a iniciar sesión.")
             }
-            if error?["code"] as? String == "PGRST202", path.contains("delete_manager") { throw MockDataService.StoreError.invalid("Ejecuta la migración 003_shift_history_manager_delete.sql en Supabase para habilitar eliminar gerentes.") }
-            throw MockDataService.StoreError.invalid("Supabase rechazó la operación. Revisa sesión, permisos o conflicto de versión. \(String(data: data, encoding: .utf8) ?? "")")
+            throw MockDataService.StoreError.invalid(Self.safeRemoteMessage(error, status: (response as? HTTPURLResponse)?.statusCode ?? 0))
         }
         return data
     }
@@ -69,28 +74,28 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
             self.auth = auth
             UserDefaults.standard.set(url, forKey: "supabaseURL"); UserDefaults.standard.set(publicKey, forKey: "supabaseKey")
             try await pull()
-            MockDataService.shared.users = rows.map { User(id: $0.id, nombre: $0.name, usuario: $0.id.uuidString, password: "", role: $0.role == "general" ? .gerenteGeneral : .gerenteSucursal, stationID: $0.station_id) }
+            MockDataService.shared.users = rows.map { User(id: $0.id, nombre: $0.name, usuario: $0.id.uuidString, password: "", role: UserRole.remote($0.role), stationID: $0.station_id) }
             for index in MockDataService.shared.users.indices { MockDataService.shared.users[index].active = rows[index].active }
-            auth.currentUser = User(id: own.id, nombre: own.name, usuario: email, password: "", role: own.role == "general" ? .gerenteGeneral : .gerenteSucursal, stationID: own.station_id)
-            message = "Conectado a Supabase. Los cambios se guardan automáticamente."
+            auth.currentUser = User(id: own.id, nombre: own.name, usuario: email, password: "", role: UserRole.remote(own.role), stationID: own.station_id)
+            message = "Conectado. Los cambios se guardan automáticamente."
             startRefreshing()
-        } catch { token = nil; profile = nil; message = error.localizedDescription }
+        } catch { token = nil; profile = nil; message = Self.friendly(error) }
     }
     /// UI actions commit only after the shared database acknowledges the revision.
     func perform(_ mutation: () -> Bool) async -> Bool {
-        guard profile != nil, !busy else { message = "Inicia sesión con Supabase para guardar."; return false }
+        guard profile != nil, !busy else { message = "Inicia sesión para guardar."; return false }
         busy = true; defer { busy = false }
         let repo = MockDataService.shared, store = OperationsStore.shared
         let stationsBefore = repo.stations, operationsBefore = store.data
         guard mutation() else { return false }
-        do { try await publish(); message = "Guardado en Supabase."; return true }
+        do { try await publish(); message = "Guardado correctamente."; return true }
         catch {
             repo.stations = stationsBefore
-            do { try repo.persist() } catch { message = "No se pudo restaurar la caché: \(error.localizedDescription)" }
+            do { try repo.persist() } catch { message = "No se pudo restaurar la caché: \(Self.friendly(error))" }
             _ = store.restore(operationsBefore)
-            if error.localizedDescription.contains("Conflicto de versión") { try? await pull() }
-            message = error.localizedDescription
-            store.error = "No se pudo guardar en Supabase. Tus datos del formulario se conservan. \(error.localizedDescription)"
+            if Self.friendly(error).contains("Los datos cambiaron") { try? await pull() }
+            message = Self.friendly(error)
+            store.error = "No se pudo guardar. Tus datos del formulario se conservan. \(Self.friendly(error))"
             return false
         }
     }
@@ -112,6 +117,13 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
             auth?.currentUser = nil; logout(); throw MockDataService.StoreError.invalid("La cuenta fue desactivada. Inicia sesión con una cuenta activa.")
         }
         profile = current; profiles = currentProfiles
+        try await pullRegister()
+        if current.role == "seller" || current.role == "dispatcher" {
+            worker = try JSONDecoder().decode(WorkerContext.self, from: await request("/rest/v1/rpc/worker_context", method: "POST", body: Data("{}".utf8)))
+            MockDataService.shared.stations = []
+            _ = OperationsStore.shared.restore(OperationsData())
+            return
+        }
         let rows = try JSONDecoder().decode([RemoteStation].self, from: await request("/rest/v1/station_documents?select=*"))
         let repo = MockDataService.shared, store = OperationsStore.shared
         if hasLoaded && repo.stations.contains(where: { baseDocuments[$0.id] == nil }) {
@@ -132,12 +144,13 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
         for row in rows { revisions[row.id] = row.revision; baseDocuments[row.id] = try canonical(row.document) }
         hasLoaded = true
         repo.users = currentProfiles.map { item in
-            var user = User(id: item.id, nombre: item.name, usuario: item.id.uuidString, password: "", role: item.role == "general" ? .gerenteGeneral : .gerenteSucursal, stationID: item.station_id)
+            var user = User(id: item.id, nombre: item.name, usuario: item.id.uuidString, password: "", role: UserRole.remote(item.role), stationID: item.station_id)
             user.active = item.active; return user
         }
     }
     func publish() async throws {
         guard let profile else { throw MockDataService.StoreError.invalid("Inicia sesión remota.") }
+        guard profile.role == "general" || profile.role == "branch" else { throw MockDataService.StoreError.invalid("Tu cuenta solo puede registrar ventas de su turno.") }
         var changes: [[String: Any]] = []
         var documents: [UUID: Data] = [:]
         for station in MockDataService.shared.stations where profile.role == "general" || station.id == profile.station_id {
@@ -163,11 +176,11 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
             let data = try await request("/auth/v1/signup", method: "POST", body: body)
             let result = try JSONSerialization.jsonObject(with: data) as? [String: Any]
             let user = result?["user"] as? [String: Any] ?? result
-            guard let id = user?["id"] as? String else { throw MockDataService.StoreError.invalid("No se pudo crear la cuenta. Revisa que el registro por correo esté habilitado en Supabase.") }
+            guard let id = user?["id"] as? String else { throw MockDataService.StoreError.invalid("No se pudo crear la cuenta. Contacta al administrador.") }
             let profileBody = try JSONSerialization.data(withJSONObject: ["p_id": id, "p_name": name, "p_station": stationID.uuidString])
             _ = try await request("/rest/v1/rpc/provision_manager", method: "POST", body: profileBody)
-            try await pull(); message = "Gerente creado. Debe confirmar el correo si Supabase lo solicita."; return true
-        } catch { message = error.localizedDescription; return false }
+            try await pull(); message = "Gerente creado. Debe confirmar el correo mediante el enlace recibido."; return true
+        } catch { message = Self.friendly(error); return false }
     }
     func assignManager(id: UUID, stationID: UUID?) async -> Bool {
         busy = true; defer { busy = false }
@@ -175,7 +188,7 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
             let body = try JSONSerialization.data(withJSONObject: ["p_id": id.uuidString, "p_station": stationID.map { $0.uuidString as Any } ?? NSNull()])
             _ = try await request("/rest/v1/rpc/assign_manager", method: "POST", body: body)
             try await pull(); message = "Asignación guardada."; return true
-        } catch { message = error.localizedDescription; return false }
+        } catch { message = Self.friendly(error); return false }
     }
     func setManager(_ id: UUID, active: Bool) async throws {
         guard !busy else { throw MockDataService.StoreError.invalid("Espera a que termine la operación actual.") }
@@ -194,7 +207,63 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
     func run(_ action: String) async {
         busy = true; defer { busy = false }
         do { if action == "push" { try await publish() } else { try await pull() }; message = "Sincronización completada." }
-        catch { message = error.localizedDescription }
+        catch { message = Self.friendly(error) }
     }
-    func logout() { refreshTask?.cancel(); refreshTask = nil; refreshToken = nil; token = nil; profile = nil; profiles = []; revisions = [:]; baseDocuments = [:]; hasLoaded = false; message = "Sesión remota cerrada." }
+    func logout() { sessions = []; registerSales = []; OperationsStore.shared.registerSales = []; closures = []; prices = []; worker = nil; refreshTask?.cancel(); refreshTask = nil; refreshToken = nil; token = nil; profile = nil; profiles = []; revisions = [:]; baseDocuments = [:]; hasLoaded = false; message = "Sesión remota cerrada." }
+
+    static func safeRemoteMessage(_ error: [String: Any]?, status: Int) -> String {
+        switch error?["message"] as? String {
+        case "EMPLOYEE": return "El empleado no está activo o no tiene una asignación válida. Contacta al gerente."
+        case "POSITION": return "El cargo del empleado no corresponde a este acceso. Contacta al gerente."
+        case "SHIFT": return "No tienes este turno asignado. Actualiza tus horarios."
+        case "FUEL": return "Selecciona el combustible y una cantidad válida de galones."
+        case "SERVICE": return "Este servicio ya no está disponible. Actualiza el catálogo."
+        case "PRODUCTS": return "Revisa los productos y cantidades del carrito."
+        case "PRICE": return "Introduce un precio mayor que cero."
+        case "ACCESS": return "Tu cuenta no tiene permiso para realizar esta acción."
+        case "STOCK": return "No hay existencias suficientes. Actualiza el catálogo."
+        case "PAYMENT": return "Revisa el monto recibido y el método de pago."
+        case "FUEL_PRICE": return "El gerente debe configurar el precio de este combustible."
+        case "OPEN_SHIFT": return "Hay una jornada abierta. Debe terminarse antes de continuar."
+        case "FIRST_CUT": return "Cierra primero el turno 1."
+        case "NO_SHIFT": return "Todavía no hay jornadas registradas para este turno."
+        case "SHIFT_TIME": return "La entrada solo se puede registrar durante el horario asignado."
+        case "SHIFT_CLOSED", "TURN_CLOSED": return "Este turno ya terminó. No se pueden registrar más ventas."
+        case "ONE_SHIFT": return "El empleado solo puede tener un turno por día."
+        case "LEGACY_CUT", "USE_REGISTER_CUT": return "Usa el corte por turno; esta fecha ya tiene registros de ventas."
+        case "REGISTER_SHIFT_IMMUTABLE": return "La jornada ya empezó. Sus marcaciones no se pueden modificar."
+        default:
+            if (error?["message"] as? String)?.contains("Conflicto de versión") == true { return "Los datos cambiaron. Actualiza y vuelve a intentar." }
+            if status == 400 && error?["error_code"] as? String == "invalid_credentials" { return "Correo o contraseña incorrectos." }
+            return "No se pudo completar la operación. Actualiza los datos y vuelve a intentar. Si continúa, contacta al administrador."
+        }
+    }
+    static func friendly(_ error: Error) -> String {
+        if let value = error as? MockDataService.StoreError { return value.localizedDescription }
+        return "No se pudo conectar. Revisa tu conexión y vuelve a intentar."
+    }
+    private func rpc(_ name: String, _ values: [String: Any]) async throws -> Data {
+        try await request("/rest/v1/rpc/" + name, method: "POST", body: JSONSerialization.data(withJSONObject: values))
+    }
+    private func pullRegister() async throws {
+        let context = try JSONDecoder().decode(RegisterContext.self, from: await rpc("register_context", [:]))
+        sessions = context.sessions; registerSales = context.sales; prices = context.prices; closures = context.closures
+        OperationsStore.shared.registerSales = registerSales
+    }
+    @discardableResult func registerAction(_ name: String, _ values: [String: Any]) async -> Bool {
+        guard !busy else { return false }
+        busy = true; defer { busy = false }
+        do { _ = try await rpc(name, values); try await pull(); message = "Guardado correctamente."; return true }
+        catch { message = Self.friendly(error); return false }
+    }
+    func createEmployeeAccount(_ employee: Employee, email: String, password: String) async -> Bool {
+        guard !busy, profile?.role == "general" || profile?.role == "branch" else { return false }
+        busy = true; defer { busy = false }
+        do {
+            let result = try JSONSerialization.jsonObject(with: await request("/auth/v1/signup", method: "POST", body: JSONSerialization.data(withJSONObject: ["email": email, "password": password]))) as? [String: Any]
+            guard let user = result?["user"] as? [String: Any], let id = user["id"] as? String else { throw MockDataService.StoreError.invalid("No se pudo crear la cuenta.") }
+            _ = try await rpc("provision_employee", ["p_id": id, "p_station": employee.stationID.uuidString, "p_employee": employee.id.uuidString, "p_role": employee.position.lowercased() == "vendedor" ? "seller" : "dispatcher"])
+            message = "Acceso creado. El empleado debe confirmar su correo antes de iniciar sesión."; return true
+        } catch { message = Self.friendly(error); return false }
+    }
 }

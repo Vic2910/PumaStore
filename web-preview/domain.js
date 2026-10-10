@@ -31,8 +31,8 @@ function validNumber(value,positive=false){return typeof value==='number'&&Numbe
 function validateCut(cut){
  assert(shifts.includes(cut.shift),'Turno inválido.');
  assert(/^\d{4}-\d{2}-\d{2}$/.test(cut.date),'Fecha inválida.');
- assert(cut.pumps.length===6&&new Set(cut.pumps.map(p=>p.number)).size===6&&cut.pumps.every(p=>Number.isInteger(p.number)&&p.number>=1&&p.number<=6),'El corte requiere exactamente las bombas 1 a 6, sin duplicados.');
- assert(cut.pumps.every(p=>p.fuel===fuelFor(p.number)&&validNumber(p.volume)&&validNumber(p.amount)),'Verifica los valores y el combustible de las seis bombas.');
+ assert([3,6].includes(cut.pumps.length)&&new Set(cut.pumps.map(p=>p.number)).size===cut.pumps.length&&cut.pumps.every(p=>Number.isInteger(p.number)&&p.number>=1&&p.number<=cut.pumps.length),'El corte requiere tres controles o seis registros históricos, sin duplicados.');
+ assert(cut.pumps.every(p=>p.fuel===(cut.pumps.length===3?fuels[p.number-1]:fuelFor(p.number))&&validNumber(p.volume)&&validNumber(p.amount)),'Verifica los valores y el combustible de los registros.');
  assert(cut.purchases.every(p=>fuels.includes(p.fuel)&&validNumber(p.volume,true)&&validNumber(p.cost)&&p.supplier.trim()),'Las compras requieren cantidad positiva, costo válido y proveedor.');
  assert(cut.losses.every(p=>fuels.includes(p.fuel)&&validNumber(p.volume,true)&&p.reason.trim()),'Las pérdidas requieren cantidad positiva y motivo.');
  if(cut.closed)assert(cut.pumps.every(p=>p.complete),'Debes registrar las seis bombas antes de cerrar el corte.');

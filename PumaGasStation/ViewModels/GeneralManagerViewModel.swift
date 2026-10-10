@@ -17,6 +17,7 @@ final class GeneralManagerViewModel: ObservableObject {
     @Published var managers: [User] = []
     @Published var stations: [Station] = []
     @Published private(set) var operations = OperationsData()
+    @Published private(set) var registerSales: [RegisterSale] = []
     /// nil = panorama general del país; un id = vista filtrada por sucursal.
     @Published var selectedStationID: UUID?
 
@@ -26,6 +27,7 @@ final class GeneralManagerViewModel: ObservableObject {
         dataService.$stations
             .assign(to: &$stations)
         operationsStore.$data.assign(to: &$operations)
+        operationsStore.$registerSales.assign(to: &$registerSales)
     }
 
     var filteredStations: [Station] {
@@ -127,14 +129,19 @@ final class GeneralManagerViewModel: ObservableObject {
         let ids = Set(branches.map(\.id))
         var fuelSales: [FuelType: Double] = [:], productItems: [UUID: ReportItem] = [:], serviceItems: [UUID: ReportItem] = [:]
         func day(_ text: String) -> Date? { ISO8601DateFormatter().date(from: text).map { calendar.startOfDay(for: $0) } }
-        for cut in branches.flatMap(\.cuts) where cut.cerrado {
+        for cut in branches.flatMap(\.cuts) where cut.cerrado && cut.registerSource != true {
             let date = calendar.startOfDay(for: cut.fecha)
             guard points[date] != nil else { continue }
             points[date]!.fuel += cut.totalVentasMonto; points[date]!.volume += cut.totalVentasGalones; points[date]!.losses += cut.totalPerdidasGalones
             for fuel in FuelType.allCases { fuelSales[fuel, default: 0] += cut.ventas(for: fuel) }
         }
+        for sale in registerSales where ids.contains(sale.station_id) {
+            guard let date = day(sale.work_day + "T12:00:00Z"), points[date] != nil else { continue }
+            points[date]!.fuel += sale.fuel_total; points[date]!.volume += sale.gallons
+            if let text = sale.fuel, let fuel = FuelType(rawValue: text) { fuelSales[fuel, default: 0] += sale.fuel_total }
+        }
         for sale in operations.sales where ids.contains(sale.stationID) {
-            guard let date = day(sale.date), points[date] != nil else { continue }
+            guard let date = day(sale.workDay.map { $0 + "T12:00:00Z" } ?? sale.date), points[date] != nil else { continue }
             points[date]!.products += sale.total
             for line in sale.lines {
                 points[date]!.units += line.quantity
@@ -143,7 +150,7 @@ final class GeneralManagerViewModel: ObservableObject {
             }
         }
         for record in operations.records where ids.contains(record.stationID) {
-            guard let date = day(record.date), points[date] != nil else { continue }
+            guard let date = day(record.workDay.map { $0 + "T12:00:00Z" } ?? record.date), points[date] != nil else { continue }
             if record.status == "Completado" {
                 points[date]!.services += record.price; points[date]!.completed += 1
                 var item = serviceItems[record.serviceID] ?? ReportItem(id: record.serviceID, name: record.name)

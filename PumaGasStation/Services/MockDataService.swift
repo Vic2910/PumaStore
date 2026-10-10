@@ -126,8 +126,8 @@ final class MockDataService: ObservableObject {
         guard !updated.cuts.contains(where: {
             $0.id != cut.id && $0.shift == cut.shift && Self.calendar.isDate($0.fecha, inSameDayAs: cut.fecha)
         }) else { throw StoreError.invalid("Ya existe este turno para la fecha seleccionada.") }
-        guard cut.pumps.count == 6, Set(cut.pumps.map(\.pumpNumber)) == Set(1...6),
-              cut.pumps.allSatisfy({ $0.fuelType == ($0.pumpNumber <= 2 ? .súper : ($0.pumpNumber <= 4 ? .regular : .diésel)) && $0.ventasGalones.isFinite && $0.ventasGalones >= 0 && $0.ventasMonto.isFinite && $0.ventasMonto >= 0 }),
+        guard (cut.pumps.count == 3 || cut.pumps.count == 6), Set(cut.pumps.map(\.pumpNumber)) == Set(1...cut.pumps.count),
+              cut.pumps.allSatisfy({ $0.fuelType == (cut.pumps.count == 3 ? ($0.pumpNumber == 1 ? .súper : ($0.pumpNumber == 2 ? .regular : .diésel)) : ($0.pumpNumber <= 2 ? .súper : ($0.pumpNumber <= 4 ? .regular : .diésel))) && $0.ventasGalones.isFinite && $0.ventasGalones >= 0 && $0.ventasMonto.isFinite && $0.ventasMonto >= 0 }),
               cut.purchases.allSatisfy({ $0.galones.isFinite && $0.galones > 0 && $0.costoTotal.isFinite && $0.costoTotal >= 0 && !$0.proveedor.trimmingCharacters(in: .whitespaces).isEmpty }),
               cut.losses.allSatisfy({ $0.galones.isFinite && $0.galones > 0 && !$0.motivo.trimmingCharacters(in: .whitespaces).isEmpty }) else {
             throw StoreError.invalid("Verifica las seis bombas y los valores de ventas, compras y pérdidas.")

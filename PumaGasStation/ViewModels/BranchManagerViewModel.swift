@@ -14,10 +14,12 @@ final class BranchManagerViewModel: ObservableObject {
 
     @Published var errorMessage: String?
     @Published var station: Station
+    @Published private var registerSales: [RegisterSale] = []
 
     init(station: Station, dataService: MockDataService = .shared) {
         self.dataService = dataService
         self.station = station
+        OperationsStore.shared.$registerSales.assign(to: &$registerSales)
         dataService.$stations
             .sink { [weak self] stations in
                 guard let self, let updated = stations.first(where: { $0.id == self.station.id }) else { return }
@@ -37,8 +39,8 @@ final class BranchManagerViewModel: ObservableObject {
     /// Crea un nuevo corte en blanco con las 6 bombas sin completar.
     func nuevoCorte(shift: CutShift) -> DailyCut {
         if let existing = station.cuts.first(where: { $0.shift == shift && MockDataService.calendar.isDate($0.fecha, inSameDayAs: Date()) }) { return existing }
-        let pumps = (1...6).map { n -> PumpReading in
-            let fuel: FuelType = n <= 2 ? .súper : (n <= 4 ? .regular : .diésel)
+        let pumps = (1...3).map { n -> PumpReading in
+            let fuel: FuelType = n == 1 ? .súper : (n == 2 ? .regular : .diésel)
             return PumpReading(pumpNumber: n, fuelType: fuel)
         }
         return DailyCut(shift: shift, pumps: pumps)
@@ -57,8 +59,9 @@ final class BranchManagerViewModel: ObservableObject {
     var todayCuts: [DailyCut] {
         station.cuts.filter { MockDataService.calendar.isDate($0.fecha, inSameDayAs: Date()) }
     }
-    var todaySales: Double { todayCuts.filter { $0.cerrado }.reduce(0) { $0 + $1.totalVentasMonto } }
-    var todayVolume: Double { todayCuts.filter { $0.cerrado }.reduce(0) { $0 + $1.totalVentasGalones } }
+    var todaySales: Double { todayCuts.filter { $0.cerrado && $0.registerSource != true }.reduce(0) { $0 + $1.totalVentasMonto } + todayRegisterSales.reduce(0) { $0 + $1.fuel_total } }
+    private var todayRegisterSales: [RegisterSale] { registerSales.filter { $0.station_id == station.id && $0.work_day == OperationsStore.workDay() } }
+    var todayVolume: Double { todayCuts.filter { $0.cerrado && $0.registerSource != true }.reduce(0) { $0 + $1.totalVentasGalones } + todayRegisterSales.reduce(0) { $0 + $1.gallons } }
 }
 
 /// Owns the editable draft; committed business validation stays in the shared store.

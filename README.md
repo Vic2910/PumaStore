@@ -23,3 +23,6 @@ Ejecuta `python -m http.server 8765 --bind 127.0.0.1 --directory web-preview` y 
 - `supabase/tests/automatic_operations.sql`: pruebas transaccionales de servidor para ejecutar en SQL Editor; termina con ROLLBACK. No ejecutadas aquí.
 
 La compilación/XCTest y revisión visual en iPhone requieren macOS/Xcode. No se certifica todavía compilación ni fidelidad píxel a píxel. Consulta [IMPLEMENTACION.md](IMPLEMENTACION.md) para arquitectura, archivos modificados y límites.
+
+
+Implementacion de jornadas y ventas de empleados: [JORNADAS_Y_VENTAS.md](JORNADAS_Y_VENTAS.md). Incluye la migracion 004, permisos, activacion y pruebas.

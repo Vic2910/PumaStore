@@ -4,6 +4,7 @@ import Combine
 final class OperationsStore: ObservableObject {
     static let shared = OperationsStore()
     @Published private(set) var data = OperationsData()
+    @Published var registerSales: [RegisterSale] = []
     @Published var error: String?
     private var loadError: String?
     private let url: URL
@@ -15,6 +16,7 @@ final class OperationsStore: ObservableObject {
         }
     }
     static func stamp(_ date: Date = Date()) -> String { ISO8601DateFormatter().string(from: date) }
+    static func workDay(_ date: Date = Date()) -> String { let f = DateFormatter(); f.timeZone = MockDataService.calendar.timeZone; f.dateFormat = "yyyy-MM-dd"; return f.string(from: date) }
     func restore(_ previous: OperationsData) -> Bool { commit { $0 = previous } }
     @discardableResult func commit(_ change: (inout OperationsData) throws -> Void) -> Bool {
         do {
@@ -45,6 +47,9 @@ final class OperationsStore: ObservableObject {
             guard let employee = next.employees.first(where: { $0.id == shift.employeeID && $0.stationID == shift.stationID }), employee.active,
                   let start = ISO8601DateFormatter().date(from: shift.start), let end = ISO8601DateFormatter().date(from: shift.end), end > start,
                   !next.shifts.contains(where: { other in other.id != shift.id && other.cancelled != true && other.employeeID == shift.employeeID && (ISO8601DateFormatter().date(from: other.start) ?? .distantPast) < end && (ISO8601DateFormatter().date(from: other.end) ?? .distantPast) > start }) else { throw MockDataService.StoreError.invalid("Empleado inactivo, horario inválido o turno superpuesto.") }
+            if assignmentChanged && next.shifts.contains(where: { other in other.id != shift.id && other.cancelled != true && other.employeeID == shift.employeeID && ISO8601DateFormatter().date(from: other.start).map { MockDataService.calendar.isDate($0, inSameDayAs: start) } == true }) {
+                throw MockDataService.StoreError.invalid("El empleado solo puede tener un turno por día.")
+            }
             if let index = next.shifts.firstIndex(where: { $0.id == shift.id }) { next.shifts[index] = shift } else { next.shifts.append(shift) }
         }
     }

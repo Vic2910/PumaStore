@@ -2,6 +2,18 @@ import XCTest
 @testable import PumaGasStation
 
 final class BusinessRulesTests: XCTestCase {
+    func testOneShiftPerEmployeePerOperationalDay() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let operations = OperationsStore(storageURL: url), station = UUID()
+        let employee = Employee(stationID: station, name: "Vendedor", document: "ONE", phone: "555", email: "", position: "Vendedor", hireDate: OperationsStore.stamp())
+        XCTAssertTrue(operations.saveEmployee(employee))
+        let day = MockDataService.calendar.date(byAdding: .day, value: 1, to: MockDataService.calendar.startOfDay(for: Date()))!
+        let first = WorkShift(stationID: station, employeeID: employee.id, start: OperationsStore.stamp(day.addingTimeInterval(6*3600)), end: OperationsStore.stamp(day.addingTimeInterval(14*3600)))
+        XCTAssertTrue(operations.saveShift(first))
+        XCTAssertFalse(operations.saveShift(WorkShift(stationID: station, employeeID: employee.id, start: first.end, end: OperationsStore.stamp(day.addingTimeInterval(22*3600)))))
+        XCTAssertEqual(operations.data.shifts.count, 1)
+    }
     func testPastShiftCannotBeAssignedButHistoryCanBePreserved() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
         defer { try? FileManager.default.removeItem(at: url) }

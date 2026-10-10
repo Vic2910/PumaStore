@@ -37,7 +37,7 @@ struct CutFormView: View {
                     Text("Sección Ventas").font(.subheadline.bold()).foregroundStyle(PumaStyle.green)
                     Text("Total Ventas del Turno ($)").font(.caption).foregroundStyle(.secondary)
                     Text(PumaStyle.money(corte.totalVentasMonto)).font(.headline).padding(10).frame(maxWidth: .infinity, alignment: .leading).background(PumaStyle.background)
-                    Text("Consolidado automáticamente de las seis bombas").font(.caption2).foregroundStyle(.secondary)
+                    Text("Consolidado automáticamente de los registros por combustible").font(.caption2).foregroundStyle(.secondary)
                 }.pumaCard()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Combustible Recibido (gal)").font(.subheadline.bold()).foregroundStyle(PumaStyle.green)
@@ -50,7 +50,7 @@ struct CutFormView: View {
                     }
                     Text("Las nuevas recepciones se registran en Más → Llenar tanques.").font(.caption).foregroundStyle(.secondary)
                 }.pumaCard()
-                Text("Registro por Bomba (6)").font(.subheadline.bold())
+                Text("Registros por combustible (\(corte.pumps.count))").font(.subheadline.bold())
                 ForEach($formModel.corte.pumps) { $pump in
                     PumpEntryRow(pump: $pump, disabled: corte.cerrado) { value in
                         formModel.updateVolume(pumpID: pump.id, volume: value)
@@ -68,7 +68,7 @@ struct CutFormView: View {
                     if !corte.cerrado { Button("Registrar pérdida / daño") { showingAddLoss = true }.font(.caption.bold()) }
                 }.pumaCard()
                 if !corte.cerrado {
-                    Text("\(corte.pumps.filter { $0.completado }.count)/6 bombas registradas").font(.caption).foregroundStyle(.secondary)
+                    Text("\(corte.pumps.filter { $0.completado }.count)/\(corte.pumps.count) registros completos").font(.caption).foregroundStyle(.secondary)
                     Button("Guardar borrador") { Task { if await SupabaseService.shared.perform({ viewModel.guardar(corte: corte, cerrar: false) }) { dismiss() } } }
                 }
             }.padding(16)
@@ -98,7 +98,7 @@ struct PumpEntryRow: View {
             HStack {
                 Image(systemName: pump.fuelType.icon)
                     .foregroundStyle(pump.fuelType.color)
-                Text("Bomba \(pump.pumpNumber) · \(pump.fuelType.rawValue)")
+                Text("Control \(pump.pumpNumber) · \(pump.fuelType.rawValue)")
                     .font(.subheadline.bold())
                 Spacer()
                 if pump.completado {
@@ -129,7 +129,7 @@ struct PumpEntryRow: View {
                     .font(.caption.bold())
             }
             if !disabled {
-                Toggle("Bomba completada", isOn: $pump.completado)
+                Toggle("Registro completo", isOn: $pump.completado)
                     .font(.caption)
             }
         }

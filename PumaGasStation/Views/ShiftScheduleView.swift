@@ -2,7 +2,12 @@ import SwiftUI
 
 enum ShiftDisplay {
     static let types = ["Mañana", "Tarde", "Noche", "Personalizado"]
-    static func date(_ text: String) -> Date { ISO8601DateFormatter().date(from: text) ?? .distantPast }
+    static func date(_ text: String) -> Date {
+        let f = ISO8601DateFormatter()
+        if let date = f.date(from: text) { return date }
+        f.formatOptions.insert(.withFractionalSeconds)
+        return f.date(from: text) ?? .distantPast
+    }
     static func format(_ text: String, pattern: String) -> String {
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "es_SV"); formatter.timeZone = MockDataService.calendar.timeZone; formatter.dateFormat = pattern
         return formatter.string(from: date(text))
@@ -104,9 +109,10 @@ struct ShiftDetailView: View {
                     }.pumaCard()
                     VStack(alignment: .leading, spacing: 8) { Text("Observaciones").font(.subheadline.bold()).foregroundStyle(PumaStyle.green); Text(shift.notes?.isEmpty == false ? shift.notes! : "Sin observaciones").font(.caption) }.pumaCard()
                     if ShiftDisplay.overnight(shift) { Label("Turno nocturno. Finaliza al día siguiente. Puedes editar o cancelar mientras esté Programado.", systemImage: "info.circle").font(.caption).padding(12).background(Color.orange.opacity(0.1)).clipShape(RoundedRectangle(cornerRadius: 8)) }
-                    if shift.status == "Programado" || shift.status == "En curso" {
+                    if (shift.status == "Programado" || shift.status == "En curso") && !["vendedor", "despachador"].contains(employee?.position.lowercased() ?? "") {
                         Button(shift.clockIn == nil ? "Registrar entrada" : "Registrar salida") { Task { _ = await remote.perform { store.clock(shift.id) } } }.buttonStyle(.bordered).disabled(employee?.active != true || remote.busy)
                     }
+                    if ["vendedor", "despachador"].contains(employee?.position.lowercased() ?? "") { Text("El empleado registra entrada y salida desde su cuenta. Para una salida supervisada, abre Ventas y cortes por turno.").font(.caption).foregroundStyle(.secondary) }
                     if let error = store.error { Text(error).font(.caption).foregroundStyle(.red) }
                 }.padding(16)
             }
@@ -129,6 +135,7 @@ struct ShiftEditorView: View {
     @ObservedObject private var remote = SupabaseService.shared
     @State private var employeeID: UUID?
     @State private var type = "Mañana"
+    @State private var operationalTurn = 1
     @State private var date = Date()
     @State private var start = Date()
     @State private var end = Date()
@@ -155,6 +162,7 @@ struct ShiftEditorView: View {
                 }.pumaCard()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Horario de trabajo").font(.subheadline.bold()).foregroundStyle(PumaStyle.green)
+                    Picker("Turno operativo", selection: $operationalTurn) { Text("Turno 1").tag(1); Text("Turno 2").tag(2) }.pickerStyle(.segmented)
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                         ForEach(ShiftDisplay.types, id: \.self) { value in Button { type = value; applyPreset() } label: { VStack { Text(value).font(.caption.bold()); Text(value == "Mañana" ? "06:00–14:00" : value == "Tarde" ? "14:00–22:00" : value == "Noche" ? "22:00–06:00 (+1 día)" : "Definir inicio y fin").font(.system(size: 9)) }.frame(maxWidth: .infinity).padding(10).background(type == value ? PumaStyle.green : PumaStyle.background).foregroundStyle(type == value ? .white : .primary).clipShape(RoundedRectangle(cornerRadius: 6)) }.buttonStyle(.plain) }
                     }
@@ -165,11 +173,11 @@ struct ShiftEditorView: View {
                     TextField("Observaciones (opcional)", text: $notes, axis: .vertical).textFieldStyle(.roundedBorder)
                 }.pumaCard()
                 if let error { VStack(alignment: .leading, spacing: 6) { Text("No se pudo guardar el turno").bold(); Text(error); Text("Tus datos se conservan; corrige el horario o vuelve a intentar.") }.font(.caption).foregroundStyle(.red).padding(12).background(Color.red.opacity(0.07)).clipShape(RoundedRectangle(cornerRadius: 8)) }
-                if saved { Label("Turno guardado correctamente en Supabase", systemImage: "checkmark.circle.fill").font(.caption).foregroundStyle(PumaStyle.green).pumaCard() }
+                if saved { Label("Turno guardado correctamente", systemImage: "checkmark.circle.fill").font(.caption).foregroundStyle(PumaStyle.green).pumaCard() }
             }.padding(16)
         }.pumaPage().navigationTitle(original == nil ? "Asignar turno" : "Editar turno").navigationBarTitleDisplayMode(.inline).environment(\.timeZone, MockDataService.calendar.timeZone)
             .safeAreaInset(edge: .bottom) { HStack { Button("Cancelar") { dismiss() }.buttonStyle(.bordered); Button(saved ? "Volver a turnos" : original == nil ? "Guardar turno" : "Guardar cambios") { if saved { dismiss() } else { Task { await save() } } }.buttonStyle(.borderedProminent).disabled((!valid && !saved) || remote.busy) }.frame(maxWidth: .infinity).padding(16).background(PumaStyle.background) }
-            .onAppear { date = initialDate; if let original { employeeID = original.employeeID; type = original.type ?? "Personalizado"; start = ShiftDisplay.date(original.start); end = ShiftDisplay.date(original.end); notes = original.notes ?? "" } else { applyPreset() } }
+            .onAppear { date = initialDate; if let original { operationalTurn = original.operationalTurn ?? (original.type == "Mañana" ? 1 : 2); employeeID = original.employeeID; type = original.type ?? "Personalizado"; start = ShiftDisplay.date(original.start); end = ShiftDisplay.date(original.end); notes = original.notes ?? "" } else { applyPreset() } }
     }
     private func applyPreset() {
         guard type != "Personalizado" else { return }
@@ -181,7 +189,7 @@ struct ShiftEditorView: View {
     private func save() async {
         guard let employeeID else { return }
         var shift = WorkShift(id: original?.id ?? UUID(), stationID: stationID, employeeID: employeeID, start: OperationsStore.stamp(start), end: OperationsStore.stamp(end))
-        shift.type = type; shift.notes = notes
+        shift.type = type; shift.notes = notes; shift.operationalTurn = operationalTurn
         error = nil; store.error = nil
         saved = await remote.perform { store.saveShift(shift) }
         if !saved { error = store.error ?? remote.message }

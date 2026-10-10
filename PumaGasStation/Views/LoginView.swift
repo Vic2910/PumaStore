@@ -37,7 +37,7 @@ struct LoginView: View {
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                    SecureField("Contraseña", text: $password)
+                    PasswordInput(title: "Contraseña", text: $password)
                         .padding()
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -63,10 +63,10 @@ struct LoginView: View {
                 }
                 .padding(.horizontal, 24)
 
-                NavigationLink("Acceso con Supabase", destination: DatabaseConnectionView())
+
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Acceso seguro con Supabase")
+                    Text("Acceso seguro")
                         .font(.caption.bold())
                     Text("Usa el correo y contraseña de tu cuenta registrada.")
                     Text("Los datos se comparten entre móvil y web.")
@@ -85,4 +85,21 @@ struct LoginView: View {
 #Preview {
     LoginView()
         .environmentObject(AuthViewModel())
+}
+
+struct PasswordInput: View {
+    let title: String
+    @Binding var text: String
+    @State private var visible = false
+    var body: some View {
+        HStack {
+            Group {
+                if visible { TextField(title, text: $text) }
+                else { SecureField(title, text: $text) }
+            }.textInputAutocapitalization(.never).autocorrectionDisabled()
+            Button { visible.toggle() } label: {
+                Image(systemName: visible ? "eye.slash" : "eye").foregroundStyle(PumaStyle.green).frame(width: 44, height: 44)
+            }.buttonStyle(.plain).accessibilityLabel(visible ? "Ocultar contraseña" : "Mostrar contraseña")
+        }
+    }
 }

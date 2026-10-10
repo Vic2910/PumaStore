@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const P=require('./domain.js');
 function fixture(){const data=P.seed();data.stations=[{id:'test',name:'PUMA Prueba',city:'San Salvador',address:'Centro',manager:'Prueba',tanks:P.fuels.map(fuel=>({fuel,capacity:1000,current:500})),cuts:[]}];return data;}
 function completed(shift='matutino'){const cut=P.blankCut(shift);cut.pumps.forEach(p=>{p.volume=10;p.amount=40;p.complete=true;});return cut;}
-test('rechaza cinco bombas y seis números duplicados',()=>{for(const mutate of [c=>c.pumps.pop(),c=>c.pumps[5].number=1]){const c=completed();mutate(c);assert.throws(()=>P.saveCut(fixture(),'test',c,true),/bombas/);}});
+test('rechaza cinco bombas y seis números duplicados',()=>{for(const mutate of [c=>c.pumps.pop(),c=>c.pumps[5].number=1]){const c=completed();mutate(c);assert.throws(()=>P.saveCut(fixture(),'test',c,true),/registros|bombas/);}});
 test('rechaza cierre con una bomba pendiente',()=>{const c=completed();c.pumps[2].complete=false;assert.throws(()=>P.saveCut(fixture(),'test',c,true),/seis bombas/);});
 test('borrador no modifica inventario ni métricas',()=>{const saved=P.saveCut(fixture(),'test',completed(),false);assert.equal(saved.stations[0].tanks[0].current,500);assert.equal(P.aggregate(saved.stations).sales,0);});
 test('consolida ventas, compras y pérdidas al cerrar',()=>{const c=completed();c.purchases=[{id:'p',fuel:'Súper',volume:100,cost:300,supplier:'PUMA'}];c.losses=[{id:'l',fuel:'Súper',volume:5,reason:'Merma'}];const saved=P.saveCut(fixture(),'test',c,true);assert.equal(saved.stations[0].tanks[0].current,575);assert.deepEqual(P.aggregate(saved.stations),{sales:240,volume:60,purchases:300,losses:5});});

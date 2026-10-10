@@ -23,7 +23,7 @@ struct AddStationView: View {
                     TextField("Ciudad", text: $ciudad)
                 }
                 Section {
-                    Text("Se creará la estación con 3 tanques (Súper, Regular, Diésel) vacíos y exactamente 6 bombas. Asigna un gerente desde Gerentes.")
+                    Text("Se creará la estación con 3 tanques vacíos de 10,000 galones. Los cortes tendrán un control para Súper, Regular y Diésel. Asigna un gerente desde Gerentes.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

@@ -54,6 +54,7 @@ struct DailyCut: Identifiable, Codable {
     var purchases: [PurchaseEntry]
     var losses: [LossEntry]
     var cerrado: Bool
+    var registerSource: Bool?
 
     init(id: UUID = UUID(), fecha: Date = Date(), shift: CutShift, pumps: [PumpReading], purchases: [PurchaseEntry] = [], losses: [LossEntry] = [], cerrado: Bool = false) {
         self.id = id
@@ -84,7 +85,7 @@ struct DailyCut: Identifiable, Codable {
     }
 
     var todasLasBombasCompletas: Bool {
-        pumps.count == 6 && Set(pumps.map(\.pumpNumber)) == Set(1...6) && pumps.allSatisfy { $0.completado }
+        (pumps.count == 3 || pumps.count == 6) && Set(pumps.map(\.pumpNumber)) == Set(1...pumps.count) && pumps.allSatisfy { $0.completado }
     }
 
     func ventas(for fuel: FuelType) -> Double {

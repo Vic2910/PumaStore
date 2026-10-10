@@ -2,12 +2,12 @@
 // A separate web shell over the same authenticated application and data layer.
 const generalWeb=!!document.body?.classList.contains('general-web');
 const previewNavigation=navigation,previewRender=render;
-const portalPages=[['dashboard','Resumen','dashboard'],['stations','Sucursales','stations'],['managers','Gerentes','managers'],['reports','Análisis de rendimiento','reports'],['fill','Llenar tanques','inventory'],['personnel','Personal','managers'],['workshifts','Turnos y horarios','cuts'],['products','Inventario comercial','inventory'],['pos','Punto de venta','money'],['services','Servicios','check'],['database','Conexión','stations'],['profile','Mi cuenta','profile']];
+const portalPages=[['dashboard','Resumen','dashboard'],['stations','Sucursales','stations'],['managers','Gerentes','managers'],['reports','Análisis de rendimiento','reports'],['fill','Llenar tanques','inventory'],['personnel','Personal','managers'],['workshifts','Turnos y horarios','cuts'],['products','Inventario comercial','inventory'],['pos','Punto de venta','money'],['services','Servicios','check'],['register','Ventas y cortes por turno','cuts'],['profile','Mi cuenta','profile']];
 const portalGroups=[
  {id:'overview',label:'Panorama general',symbol:'dashboard',pages:['dashboard','reports']},
  {id:'administration',label:'Administración',symbol:'managers',pages:['stations','managers','personnel','workshifts']},
- {id:'operations',label:'Operación y ventas',symbol:'inventory',pages:['fill','products','pos','services']},
- {id:'account',label:'Cuenta y conexión',symbol:'profile',pages:['profile','database']}
+ {id:'operations',label:'Operación y ventas',symbol:'inventory',pages:['fill','products','pos','services','register']},
+ {id:'account',label:'Cuenta y conexión',symbol:'profile',pages:['profile']}
 ];
 let portalOpenGroup='overview',portalLastPage=null;
 function portalSelected(page){return state.page===page||(page==='stations'&&state.page==='detail')||(page==='workshifts'&&['shiftEditor','shiftDetail'].includes(state.page));}

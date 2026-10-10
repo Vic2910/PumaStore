@@ -6,12 +6,13 @@ struct RootView: View {
         Group {
             if let user = authViewModel.currentUser {
                 if user.role == .gerenteGeneral { GeneralShell() }
+                else if user.role == .vendedor || user.role == .despachador { WorkerRegisterView() }
                 else if let station = MockDataService.shared.station(for: user) { BranchShell(station: station).id(station.id) }
                 else { NavigationStack { ProfileView() } }
             } else { LoginView() }
         }.tint(PumaStyle.green).preferredColorScheme(.light)
             .disabled(remote.busy)
-            .overlay(alignment: .top) { if remote.busy { ProgressView("Conectando con Supabase…").padding(10).background(.regularMaterial).clipShape(Capsule()) } }
+            .overlay(alignment: .top) { if remote.busy { ProgressView("Conectando…").padding(10).background(.regularMaterial).clipShape(Capsule()) } }
     }
 }
 struct GeneralShell: View {
@@ -34,7 +35,7 @@ struct BranchShell: View {
             NavigationStack { BMDashboardView() }.tabItem { Label("Dashboard", systemImage: "square.grid.3x3") }
             NavigationStack { DailyCutsView() }.tabItem { Label("Cortes", systemImage: "doc.text") }
             NavigationStack { InventoryView() }.tabItem { Label("Inventario", systemImage: "drop") }
-            NavigationStack { PumpsView() }.tabItem { Label("Bombas", systemImage: "waveform.path.ecg") }
+            NavigationStack { PumpsView() }.tabItem { Label("Control", systemImage: "waveform.path.ecg") }
             NavigationStack { OperationsMenuView() }.tabItem { Label("Más", systemImage: "line.3.horizontal") }
         }.environmentObject(model)
     }

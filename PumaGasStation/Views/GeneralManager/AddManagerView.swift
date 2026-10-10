@@ -22,7 +22,7 @@ struct AddManagerView: View {
                     TextField("Correo electrónico", text: $usuario).keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    SecureField("Contraseña", text: $password)
+                    PasswordInput(title: "Contraseña", text: $password)
                 }
                 Section("Sucursal a vincular") {
                     Picker("Sucursal", selection: $selectedStationID) {

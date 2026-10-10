@@ -13,7 +13,7 @@ struct StationManagementView: View {
                             HStack { Text(station.nombre).font(.headline); Spacer(); Text("Activa").font(.caption2.bold()).foregroundStyle(PumaStyle.green).padding(4).background(PumaStyle.green.opacity(0.1)) }
                             Text(station.ciudad).font(.caption).foregroundStyle(PumaStyle.green)
                             Text(station.direccion).font(.caption2).foregroundStyle(.secondary)
-                            Label("6 bombas", systemImage: "bolt").font(.caption2)
+                            Label("3 controles de combustible", systemImage: "bolt").font(.caption2)
                             Divider()
                             HStack { Text("👩🏻‍🦰"); Text(station.gerenteNombre).font(.caption); Spacer(); Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary) }
                         }.pumaCard()
@@ -44,7 +44,7 @@ struct ManagersView: View {
                                 Task { @MainActor in
                                     if SupabaseService.shared.profile != nil {
                                         do { try await SupabaseService.shared.setManager(user.id, active: !user.isActive) } catch { viewModel.errorMessage = error.localizedDescription }
-                                    } else { viewModel.errorMessage = "Inicia sesión con Supabase." }
+                                    } else { viewModel.errorMessage = "Inicia sesión para continuar." }
                                 }
                             }
                             Button("Reasignar") { selected = user }.disabled(!user.isActive).font(.caption.bold()).buttonStyle(.bordered)
