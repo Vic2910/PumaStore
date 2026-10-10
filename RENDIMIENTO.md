@@ -34,4 +34,4 @@ Los montos representan ingresos operativos, **no utilidad ni un reporte contable
 
 ## Verificación
 
-41 pruebas JavaScript aprobadas. La estructura y referencias del proyecto Xcode pasan la verificación. SwiftUI y XCTest no se pueden compilar/ejecutar en este entorno Windows. El render web se prueba con DOM simulado; queda pendiente revisión visual y prueba con sesión real en ambos clientes. La disponibilidad de datos reales depende de la configuración de Auth y las migraciones ya documentadas en `PUESTA_EN_MARCHA.md`.
+44 pruebas JavaScript aprobadas. La estructura y referencias del proyecto Xcode pasan la verificación. SwiftUI y XCTest no se pueden compilar/ejecutar en este entorno Windows. El render web se prueba con DOM simulado; queda pendiente revisión visual y prueba con sesión real en ambos clientes. La disponibilidad de datos reales depende de la configuración de Auth y las migraciones ya documentadas en `PUESTA_EN_MARCHA.md`.

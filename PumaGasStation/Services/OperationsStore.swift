@@ -37,6 +37,11 @@ final class OperationsStore: ObservableObject {
             if let existing = next.shifts.first(where: { $0.id == shift.id }), !existing.isEditable {
                 throw MockDataService.StoreError.invalid("Solo puedes editar un turno Programado.")
             }
+            let previous = next.shifts.first { $0.id == shift.id }
+            let assignmentChanged = previous == nil || previous?.employeeID != shift.employeeID || previous?.stationID != shift.stationID || previous?.start != shift.start || previous?.end != shift.end
+            if assignmentChanged, let start = ISO8601DateFormatter().date(from: shift.start), MockDataService.calendar.startOfDay(for: start) < MockDataService.calendar.startOfDay(for: Date()) {
+                throw MockDataService.StoreError.invalid("No puedes asignar turnos en una fecha pasada.")
+            }
             guard let employee = next.employees.first(where: { $0.id == shift.employeeID && $0.stationID == shift.stationID }), employee.active,
                   let start = ISO8601DateFormatter().date(from: shift.start), let end = ISO8601DateFormatter().date(from: shift.end), end > start,
                   !next.shifts.contains(where: { other in other.id != shift.id && other.cancelled != true && other.employeeID == shift.employeeID && (ISO8601DateFormatter().date(from: other.start) ?? .distantPast) < end && (ISO8601DateFormatter().date(from: other.end) ?? .distantPast) > start }) else { throw MockDataService.StoreError.invalid("Empleado inactivo, horario inválido o turno superpuesto.") }

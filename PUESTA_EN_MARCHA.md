@@ -43,3 +43,5 @@ No compartas contraseñas ni claves administrativas en el chat. La clave `anon` 
 Las comprobaciones reales hechas hasta ahora verifican conectividad y existencia de tablas/funciones, **no una sesión de usuario ni una venta real**. Para completar esa comprobación hace falta crear la cuenta y ejecutar el recorrido anterior.
 
 Opcional: [supabase/tests/automatic_operations.sql](supabase/tests/automatic_operations.sql) comprueba en SQL Editor permisos, revisiones, conflictos y baja de gerente dentro de una transacción que termina en `ROLLBACK`. No lo he ejecutado en tu servidor; no deja las cuentas ni los datos temporales de prueba.
+
+Para la validación de fechas pasadas y eliminar perfiles de gerentes, ejecuta también `supabase/migrations/003_shift_history_manager_delete.sql` después de 002. Consulta [TURNOS_Y_ELIMINACION.md](TURNOS_Y_ELIMINACION.md).

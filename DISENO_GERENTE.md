@@ -28,6 +28,6 @@ Los componentes SwiftUI nuevos permanecen en `OperationsView.swift`, ya registra
 
 ## Verificación
 
-41 pruebas JavaScript aprobadas, incluyendo navegación/render de detalle de personal, inventario, carrito, confirmación de venta y detalle de servicio. Son pruebas con DOM y REST simulados; no sustituyen una inspección visual ni una sesión autenticada real.
+44 pruebas JavaScript aprobadas, incluyendo navegación/render de detalle de personal, inventario, carrito, confirmación de venta y detalle de servicio. Son pruebas con DOM y REST simulados; no sustituyen una inspección visual ni una sesión autenticada real.
 
 La estructura del proyecto Xcode pasa la verificación de referencias y archivos. Este entorno Windows no permite compilar SwiftUI ni ejecutar el simulador. El navegador automatizado disponible falla al iniciar, por lo que resta revisar visualmente la web y el simulador en el equipo de desarrollo.

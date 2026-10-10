@@ -46,6 +46,7 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
             if error?["error_code"] as? String == "email_not_confirmed" {
                 throw MockDataService.StoreError.invalid("Confirma tu correo antes de iniciar sesión. Revisa el mensaje de Supabase en tu bandeja de entrada o spam y abre el enlace de confirmación. Después vuelve a iniciar sesión.")
             }
+            if error?["code"] as? String == "PGRST202", path.contains("delete_manager") { throw MockDataService.StoreError.invalid("Ejecuta la migración 003_shift_history_manager_delete.sql en Supabase para habilitar eliminar gerentes.") }
             throw MockDataService.StoreError.invalid("Supabase rechazó la operación. Revisa sesión, permisos o conflicto de versión. \(String(data: data, encoding: .utf8) ?? "")")
         }
         return data
@@ -182,6 +183,13 @@ private struct RemoteRevision: Codable { var id: UUID; var revision: Int }
         let body = try JSONSerialization.data(withJSONObject: ["p_id": id.uuidString, "p_active": active])
         _ = try await request("/rest/v1/rpc/set_manager_active", method: "POST", body: body)
         try await pull()
+    }
+    func deleteManager(_ id: UUID) async throws {
+        guard profile?.role == "general", !busy else { throw MockDataService.StoreError.invalid("Inicia sesión como gerente general y espera a que termine la operación actual.") }
+        busy = true; defer { busy = false }
+        let body = try JSONSerialization.data(withJSONObject: ["p_id": id.uuidString])
+        _ = try await request("/rest/v1/rpc/delete_manager", method: "POST", body: body)
+        try await pull(); message = "Gerente eliminado. El historial de la sucursal se conserva."
     }
     func run(_ action: String) async {
         busy = true; defer { busy = false }

@@ -29,6 +29,7 @@ struct ManagersView: View {
     @EnvironmentObject var viewModel: GeneralManagerViewModel
     @State private var showAdd = false
     @State private var selected: User?
+    @State private var deleting: User?
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
@@ -47,6 +48,7 @@ struct ManagersView: View {
                                 }
                             }
                             Button("Reasignar") { selected = user }.disabled(!user.isActive).font(.caption.bold()).buttonStyle(.bordered)
+                            Button("Eliminar gerente", role: .destructive) { deleting = user }.font(.caption.bold()).buttonStyle(.bordered)
                         }
                         Spacer(minLength: 0)
                         Text(user.stationID == nil ? "Disponible" : "Asignado").font(.caption2).foregroundStyle(PumaStyle.green)
@@ -57,6 +59,10 @@ struct ManagersView: View {
             .toolbar { Button { showAdd = true } label: { Label("Asignar", systemImage: "plus") }.buttonStyle(.borderedProminent) }
             .sheet(isPresented: $showAdd) { AddManagerView() }
             .sheet(item: $selected) { user in ManagerAssignmentView(user: user) }
+            .confirmationDialog("¿Eliminar a \(deleting?.nombre ?? "este gerente")?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+                Button("Eliminar gerente", role: .destructive) { if let user = deleting { Task { do { try await SupabaseService.shared.deleteManager(user.id) } catch { viewModel.errorMessage = error.localizedDescription } } }; deleting = nil }
+            } message: { Text("Se eliminará su perfil y acceso a la aplicación y se liberará la sucursal. Los registros históricos se conservarán.") }
+            .alert("No se pudo completar", isPresented: Binding(get: { viewModel.errorMessage != nil }, set: { if !$0 { viewModel.errorMessage = nil } })) { Button("Aceptar") { viewModel.errorMessage = nil } } message: { Text(viewModel.errorMessage ?? "") }
     }
 }
 struct ManagerAssignmentView: View {

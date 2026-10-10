@@ -16,6 +16,7 @@ enum ShiftDisplay {
 struct ShiftScheduleView: View {
     var initialStationID: UUID? = nil
     var initialEmployeeID: UUID? = nil
+    var initialHistory = false
     @EnvironmentObject var authViewModel: AuthViewModel
     @ObservedObject private var repo = MockDataService.shared
     @ObservedObject private var store = OperationsStore.shared
@@ -25,17 +26,19 @@ struct ShiftScheduleView: View {
     @State private var status = "Todos"
     @State private var day = Date()
     @State private var assigning = false
+    @State private var history = false
     private var stations: [Station] { repo.stations.filter { authViewModel.currentUser?.role == .gerenteGeneral || $0.id == authViewModel.currentUser?.stationID } }
     private var selected: UUID? { stationID ?? stations.first?.id }
     private var employees: [Employee] { store.data.employees.filter { $0.stationID == selected } }
-    private var scheduled: [WorkShift] { store.data.shifts.filter { $0.stationID == selected && MockDataService.calendar.isDate(ShiftDisplay.date($0.start), inSameDayAs: day) && (employeeID == nil || $0.employeeID == employeeID) }.sorted { $0.start < $1.start } }
+    private var scheduled: [WorkShift] { store.data.shifts.filter { $0.stationID == selected && (history || MockDataService.calendar.isDate(ShiftDisplay.date($0.start), inSameDayAs: day)) && (employeeID == nil || $0.employeeID == employeeID) }.sorted { history ? $0.start > $1.start : $0.start < $1.start } }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Turnos y horarios · \(stations.first { $0.id == selected }?.nombre ?? "Sin sucursal")").font(.caption).foregroundStyle(PumaStyle.green)
+                Picker("Vista", selection: $history) { Text("Programación").tag(false); Text("Historial").tag(true) }.pickerStyle(.segmented)
                 HStack {
                     Picker("Sucursal", selection: $stationID) { ForEach(stations) { Text($0.nombre).tag(Optional($0.id)) } }
-                    DatePicker("Fecha", selection: $day, displayedComponents: .date).labelsHidden()
+                    if !history { DatePicker("Fecha", selection: $day, displayedComponents: .date).labelsHidden() }
                 }.font(.caption)
                 HStack {
                     Picker("Empleado", selection: $employeeID) { Text("Todos").tag(UUID?.none); ForEach(employees) { Text($0.name).tag(Optional($0.id)) } }
@@ -52,6 +55,7 @@ struct ShiftScheduleView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack { Text(employees.first { $0.id == shift.employeeID }?.name ?? "Empleado").font(.subheadline.bold()); Spacer(); shiftBadge(shift.status) }
                             Text("\(ShiftDisplay.code(shift)) · \(employees.first { $0.id == shift.employeeID }?.position ?? "")").font(.caption2).foregroundStyle(.secondary)
+                            if history { Text(ShiftDisplay.format(shift.start, pattern: "dd/MM/yyyy")).font(.caption).foregroundStyle(.secondary) }
                             HStack { Text("\(ShiftDisplay.format(shift.start, pattern: "HH:mm"))–\(ShiftDisplay.format(shift.end, pattern: "HH:mm")) · \(shift.type ?? "Personalizado") · \(ShiftDisplay.duration(shift))").font(.caption).foregroundStyle(PumaStyle.green); Spacer(); Image(systemName: "chevron.right").font(.caption2) }
                             if ShiftDisplay.overnight(shift) { Text("Salida: \(ShiftDisplay.format(shift.end, pattern: "dd/MM/yyyy")) (+1 día)").font(.caption2).foregroundStyle(PumaStyle.green) }
                         }.pumaCard()
@@ -61,10 +65,10 @@ struct ShiftScheduleView: View {
             }.padding(16)
         }.pumaPage().navigationTitle("Programación de turnos").navigationBarTitleDisplayMode(.inline)
             .environment(\.timeZone, MockDataService.calendar.timeZone)
-            .onAppear { if stationID == nil { stationID = initialStationID ?? selected; employeeID = initialEmployeeID } }
+            .onAppear { if stationID == nil { stationID = initialStationID ?? selected; employeeID = initialEmployeeID; history = initialHistory } }
             .onChange(of: stationID) { _, value in employeeID = value == initialStationID ? initialEmployeeID : nil }
             .safeAreaInset(edge: .bottom) { Button("+ Asignar turno") { assigning = true }.buttonStyle(.borderedProminent).frame(maxWidth: .infinity).padding(16).background(PumaStyle.background).disabled(selected == nil || remote.busy) }
-            .sheet(isPresented: $assigning) { if let selected { NavigationStack { ShiftEditorView(stationID: selected, initialDate: day) } } }
+            .sheet(isPresented: $assigning) { if let selected { NavigationStack { ShiftEditorView(stationID: selected, initialDate: max(day, MockDataService.calendar.startOfDay(for: Date()))) } } }
     }
 }
 
@@ -132,7 +136,11 @@ struct ShiftEditorView: View {
     @State private var saved = false
     @State private var error: String?
     private var activeEmployees: [Employee] { store.data.employees.filter { $0.stationID == stationID && $0.active } }
-    private var valid: Bool { employeeID != nil && end > start && activeEmployees.contains { $0.id == employeeID } }
+    private var dateAllowed: Bool {
+        let unchanged = original?.employeeID == employeeID && original.map { ShiftDisplay.date($0.start) == start && ShiftDisplay.date($0.end) == end } == true
+        return unchanged || MockDataService.calendar.startOfDay(for: start) >= MockDataService.calendar.startOfDay(for: Date())
+    }
+    private var valid: Bool { employeeID != nil && end > start && dateAllowed && activeEmployees.contains { $0.id == employeeID } }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
@@ -142,7 +150,8 @@ struct ShiftEditorView: View {
                     Text(MockDataService.shared.station(id: stationID)?.nombre ?? "").font(.caption)
                     Picker("Empleado activo *", selection: $employeeID) { Text("Seleccionar empleado").tag(UUID?.none); ForEach(activeEmployees) { Text("\($0.name) · \($0.position)").tag(Optional($0.id)) } }
                     if let employee = activeEmployees.first(where: { $0.id == employeeID }) { Text("Cargo: \(employee.position)").font(.caption) }
-                    DatePicker("Fecha de inicio *", selection: $date, displayedComponents: .date).onChange(of: date) { _, _ in applyPreset() }
+                    DatePicker("Fecha de inicio *", selection: $date, in: (original.map { min(ShiftDisplay.date($0.start), MockDataService.calendar.startOfDay(for: Date())) } ?? MockDataService.calendar.startOfDay(for: Date()))..., displayedComponents: .date).onChange(of: date) { _, _ in applyPreset() }
+                    if !dateAllowed { Text("No puedes asignar turnos en una fecha pasada.").font(.caption).foregroundStyle(.red) }
                 }.pumaCard()
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Horario de trabajo").font(.subheadline.bold()).foregroundStyle(PumaStyle.green)

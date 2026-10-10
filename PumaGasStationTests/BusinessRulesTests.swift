@@ -2,6 +2,23 @@ import XCTest
 @testable import PumaGasStation
 
 final class BusinessRulesTests: XCTestCase {
+    func testPastShiftCannotBeAssignedButHistoryCanBePreserved() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let store = OperationsStore(storageURL: url), station = UUID()
+        let employee = Employee(stationID: station, name: "Ana", document: "PAST", phone: "555", email: "", position: "Cajera", hireDate: OperationsStore.stamp())
+        XCTAssertTrue(store.saveEmployee(employee))
+        let yesterday = MockDataService.calendar.date(byAdding: .day, value: -1, to: MockDataService.calendar.startOfDay(for: Date()))!
+        let old = WorkShift(stationID: station, employeeID: employee.id, start: OperationsStore.stamp(yesterday), end: OperationsStore.stamp(yesterday.addingTimeInterval(8 * 3600)))
+        XCTAssertFalse(store.saveShift(old))
+        XCTAssertTrue(store.data.shifts.isEmpty)
+        var historical = store.data; historical.shifts = [old]
+        XCTAssertTrue(store.restore(historical))
+        var note = old; note.notes = "Historial conservado"
+        XCTAssertTrue(store.saveShift(note))
+        XCTAssertTrue(store.cancelShift(old.id))
+        XCTAssertEqual(store.data.shifts.count, 1)
+    }
     func testPerformanceCombinesHistoricalIncomeAndFiltersLocalDays() throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: folder) }

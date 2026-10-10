@@ -24,6 +24,8 @@ function save(data,kind,item){
  }
  if(kind==='services')assert(item.name.trim()&&Number.isFinite(item.price)&&item.price>=0,'Verifica nombre y precio.');
  if(kind==='shifts'){
+  const previous=list.find(s=>s.id===item.id),changed=!previous||['employeeID','stationID','start','end'].some(k=>previous[k]!==item[k]);
+  if(changed&&Number.isFinite(Date.parse(item.start)))assert(P.day(new Date(item.start))>=P.day(),'No puedes asignar turnos en una fecha pasada.');
   const existing=list.find(s=>s.id===item.id);assert(!existing||shiftStatus(existing)==='Programado','Solo puedes editar un turno Programado.');
   assert(next.operations.employees.some(e=>e.id===item.employeeID&&e.stationID===item.stationID&&e.active),'Selecciona un empleado activo de esta sucursal.');
   assert(Number.isFinite(Date.parse(item.start))&&Date.parse(item.end)>Date.parse(item.start),'El fin debe ser posterior al inicio.');
@@ -44,6 +46,7 @@ function record(data,fields){const next=normalize(data),s=next.operations.servic
 function transition(data,id,status){const next=normalize(data),r=next.operations.records.find(r=>r.id===id);assert(r&&['Pendiente','En proceso'].includes(r.status)&&['En proceso','Completado','Cancelado'].includes(status),'El servicio ya terminó.');r.status=status;return next;}
 function fill(data,stationID,fuel,volume,cost,supplier){const next=normalize(data),s=next.stations.find(s=>s.id===stationID),t=s?.tanks.find(t=>t.fuel===fuel);assert(t&&Number.isFinite(volume)&&volume>0&&Number.isFinite(cost)&&cost>=0&&supplier.trim()&&t.current+volume<=t.capacity,'Verifica cantidad, proveedor y capacidad.');t.current+=volume;s.receipts=s.receipts||[];s.receipts.push({id:P.id(),stationID,date:stamp(),fuel,volume,cost,supplier});return next;}
 function manager(data,id,active){let next=P.assign(data,id,null);const u=next.users.find(u=>u.id===id&&u.role==='branch');assert(u,'Gerente inexistente.');u.active=active;return next;}
+function deleteManager(data,id){assert(data.users.some(u=>u.id===id&&u.role==='branch'),'Solo puedes eliminar gerentes de sucursal.');const next=P.assign(data,id,null);next.users=next.users.filter(u=>u.id!==id);return next;}
 function performance(data,stations,days,category='all',endDay=P.day()){
  assert(Number.isInteger(days)&&days>0&&days<=365,'Período inválido.');
  assert(['all','fuel','products','services'].includes(category),'Actividad inválida.');
@@ -61,5 +64,5 @@ function performance(data,stations,days,category='all',endDay=P.day()){
  return {points,summary,fuelSales,products:[...productSales.values()].sort((a,b)=>b.revenue-a.revenue),services:[...serviceSales.values()].sort((a,b)=>b.revenue-a.revenue)};
 }
 function performanceCSV(report){return 'Fecha,Combustible USD,Productos USD,Servicios completados USD,Ingresos totales USD,Ingresos actividad seleccionada USD,Galones vendidos,Perdidas gal,Unidades productos,Servicios completados,Servicios pendientes,Servicios cancelados\n'+report.points.map(p=>[p.date,p.fuel.toFixed(2),p.products.toFixed(2),p.services.toFixed(2),p.total.toFixed(2),p.sales.toFixed(2),p.volume,p.losses,p.units,p.completed,p.pending,p.cancelled].join(',')).join('\n');}
-return {empty,normalize,save,clock,sell,record,transition,fill,manager,total,stamp,shiftStatus,cancelShift,performance,performanceCSV};
+return {empty,normalize,save,clock,sell,record,transition,fill,manager,deleteManager,total,stamp,shiftStatus,cancelShift,performance,performanceCSV};
 });

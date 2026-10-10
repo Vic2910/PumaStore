@@ -8,6 +8,11 @@ function browser(search='?test=unit',portal=false){
  if(portal)vm.runInContext(globalThis.pumaSources['gerente.js'],sandbox,{filename:'gerente.js'});
  return {sandbox,nodes,events,run:code=>vm.runInContext(code,sandbox)};
 }
+test('historial de turnos muestra todas las fechas del empleado y gestores ofrecen eliminar',()=>{
+ const b=browser();b.run("login('gerente.general','1234');operationStation='santa';data.operations.employees.push({id:'history-emp',stationID:'santa',name:'Historial Ana',active:true});data.operations.shifts.push({id:'old-turn',stationID:'santa',employeeID:'history-emp',start:'2020-01-01T12:00:00Z',end:'2020-01-01T20:00:00Z',clockIn:'2020-01-01T12:00:00Z',clockOut:'2020-01-01T20:00:00Z'},{id:'other-turn',stationID:'santa',employeeID:'other',start:'2020-01-02T12:00:00Z',end:'2020-01-02T20:00:00Z'});go('workshifts');ShiftUI.history=true;ShiftUI.employee='history-emp';render()");
+ const html=b.nodes.get('#app').innerHTML;assert.match(html,/01\/01\/2020/);assert.match(html,/Completado/);assert.doesNotMatch(html,/TUR-OTHER/);assert.doesNotMatch(html,/id="shift-day"/);
+ b.run("go('managers')");assert.match(b.nodes.get('#app').innerHTML,/Eliminar gerente/);
+});
 test('portal independiente muestra navegación completa y restringe cuentas de sucursal',()=>{
  const b=browser('?test=portal',true);assert.equal(b.sandbox.document.body.classList.contains('portal-authenticated'),false);b.run("login('gerente.general','1234')");assert.equal(b.sandbox.document.body.classList.contains('portal-authenticated'),true);assert.match(b.nodes.get('#navigation').innerHTML,/portal-nav/);assert.match(b.nodes.get('#navigation').innerHTML,/Inventario comercial/);assert.match(b.nodes.get('#navigation').innerHTML,/Turnos y horarios/);assert.doesNotMatch(b.nodes.get('#navigation').innerHTML,/tabbar/);
  for(const page of ['dashboard','stations','managers','reports','fill','personnel','workshifts','products','pos','services','database','profile']){b.run(`go('${page}')`);assert.equal(b.nodes.get('#app').dataset.portalPage,page);assert.ok(b.nodes.get('#app').innerHTML.length>100);}

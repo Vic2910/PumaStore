@@ -31,4 +31,4 @@ Ambas entradas usan la misma lógica y cliente Supabase; no duplican la base ni 
 
 ## Validación
 
-41 pruebas JavaScript aprobadas, incluidas las de guardado y Auth simulados. Las pruebas de render usan DOM simulado. El navegador automatizado falla al iniciar en este entorno; no se ha verificado la apariencia con capturas reales de escritorio y teléfono ni una sesión real de gerente general. La preview se conserva y sus archivos de entrada no se modifican para crear el portal.
+44 pruebas JavaScript aprobadas, incluidas las de guardado y Auth simulados. Las pruebas de render usan DOM simulado. El navegador automatizado falla al iniciar en este entorno; no se ha verificado la apariencia con capturas reales de escritorio y teléfono ni una sesión real de gerente general. La preview se conserva y sus archivos de entrada no se modifican para crear el portal.

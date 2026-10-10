@@ -23,6 +23,18 @@ test('filtros, días vacíos y CSV conservan el desglose y usan el calendario de
  assert.equal(O.performance(d,[],7,'services','2026-10-09').summary.sales,0);assert.throws(()=>O.performance(d,d.stations,0),/Período/);
 });
 function employee(data,active=true){return O.save(data,'employees',{id:'emp',stationID:'santa',name:'Carlos',document:'DOC1',phone:'555',email:'',position:'Cajero',hireDate:'2026-10-01T00:00:00Z',active});}
+test('asignación rechaza ayer y permite hoy; el historial previo no bloquea notas ni cancelación',()=>{
+ const d=employee(fixture()),today=P.day(),date=new Date(today+'T12:00:00Z');date.setUTCDate(date.getUTCDate()-1);const yesterday=date.toISOString().slice(0,10),s={id:'past',stationID:'santa',employeeID:'emp',start:yesterday+'T10:00:00-06:00',end:yesterday+'T18:00:00-06:00'};
+ assert.throws(()=>O.save(d,'shifts',s),/fecha pasada/);assert.equal(d.operations.shifts.length,0);
+ assert.equal(O.save(d,'shifts',{...s,start:today+'T10:00:00-06:00',end:today+'T18:00:00-06:00'}).operations.shifts.length,1);
+ d.operations.shifts.push(s);assert.equal(O.save(d,'shifts',{...s,notes:'Observación histórica'}).operations.shifts[0].notes,'Observación histórica');assert.equal(O.cancelShift(d,'past').operations.shifts[0].cancelled,true);
+ assert.throws(()=>O.save(d,'shifts',{...s,end:yesterday+'T19:00:00-06:00'}),/fecha pasada/);
+});
+test('eliminar gerente libera sucursal y elimina acceso sin borrar registros ni aceptar generales',()=>{
+ const d=fixture(),m=d.users.find(u=>u.role==='branch'),branch=d.stations.find(s=>s.id===m.stationId),history=JSON.stringify(branch.cuts),n=O.deleteManager(d,m.id);
+ assert.equal(n.users.some(u=>u.id===m.id),false);assert.equal(n.stations.find(s=>s.id===branch.id).manager,'Sin asignar');assert.equal(JSON.stringify(n.stations.find(s=>s.id===branch.id).cuts),history);assert.equal(d.users.some(u=>u.id===m.id),true);
+ assert.throws(()=>O.deleteManager(d,d.users.find(u=>u.role==='general').id),/sucursal/);m.active=false;assert.equal(O.deleteManager(d,m.id).users.some(u=>u.id===m.id),false);
+});
 function product(data){return O.save(data,'products',{id:'prod',stationID:'santa',name:'Aceite',sku:'LUB1',category:'Lubricantes',price:10,cost:5,stock:5,minimum:2,active:true});}
 test('todos los tanques iniciales y nuevas sucursales tienen 10000',()=>{assert.ok(P.seed().stations.every(s=>s.tanks.every(t=>t.capacity===10000)));assert.ok(P.addStation(P.seed(),{name:'Nueva',city:'Ciudad',address:'Calle'}).stations.at(-1).tanks.every(t=>t.capacity===10000));});
 test('llenado actualiza una vez y rechaza exceso sin mutar',()=>{const d=fixture(),n=O.fill(d,'santa','Súper',100,10,'Proveedor');assert.equal(n.stations[0].tanks[0].current,7300);assert.equal(n.stations[0].receipts.length,1);assert.equal(d.stations[0].tanks[0].current,7200);assert.throws(()=>O.fill(d,'santa','Súper',3000,10,'P'),/capacidad/);});

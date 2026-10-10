@@ -16,7 +16,7 @@ Ejecuta `python -m http.server 8765 --bind 127.0.0.1 --directory web-preview` y 
 
 ## Comprobaciones
 
-- `python scripts/test_web.py`: 41 pruebas JavaScript de negocio, render HTML, Auth/REST simulados, guardado automático y errores de red.
+- `python scripts/test_web.py`: 44 pruebas JavaScript de negocio, render HTML, Auth/REST simulados, guardado automático y errores de red.
 - `python scripts/verify_project.py`: PBX, scheme y assets válidos; 27 archivos Swift registrados.
 - `python web-preview/build-preview.py`: regenera el HTML autónomo.
 - `python scripts/check_supabase.py`: comprobaciones no mutantes de Auth, permisos anónimos y existencia del endpoint de guardado.

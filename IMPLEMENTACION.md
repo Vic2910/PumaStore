@@ -64,7 +64,7 @@ Capacidad inicial sigue en **10,000 galones**, no existencias iniciales: una suc
 
 ## Verificación y límites
 
-- **41 pruebas JavaScript** pasan: negocio, estados/solapamientos, render de pantallas, Auth y renovación simulados, confirmación remota, rechazo de sesión ausente y conservación de datos ante error. REST y DOM de estas pruebas son simulados.
+- **44 pruebas JavaScript** pasan: negocio, estados/solapamientos, render de pantallas, Auth y renovación simulados, confirmación remota, rechazo de sesión ausente y conservación de datos ante error. REST y DOM de estas pruebas son simulados.
 - Proyecto Xcode estructuralmente válido: 95 objetos PBX y 27 fuentes Swift, referencias, scheme y assets verificados. No equivale a compilar.
 - Compilación/XCTest: pendientes; Windows no tiene Xcode/iOS SDK. Se añadieron pruebas Swift para ejecutar en macOS.
 - Navegador real: la herramienta falló al inicializar; comparación visual pendiente. Las pantallas no se certifican píxel a píxel.
